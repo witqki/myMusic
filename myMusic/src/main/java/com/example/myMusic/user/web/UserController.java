@@ -36,11 +36,11 @@ public class UserController {
 		 return extAjaxResponse;
 	 }
 	 
-	 @PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
+	 @PostMapping(value="/register",consumes=MediaType.APPLICATION_JSON_VALUE)
 	 public ExtAjaxResponse userregistered(@RequestBody UserregisteredDTO userregisteredDTO) {
 		
 		 ExtAjaxResponse extAjaxResponse= userService.userregistered(userregisteredDTO);
-		 
+		
 		 return extAjaxResponse;
 	 }
 	 

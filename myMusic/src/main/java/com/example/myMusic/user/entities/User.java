@@ -10,9 +10,16 @@ public class User extends BaseEntity{
 	
 	 private String name;
      private String password;
+     private Integer sex;
      private String phone;
      private String email;
      
+	public Integer getSex() {
+		return sex;
+	}
+	public void setSex(Integer sex) {
+		this.sex = sex;
+	}
 	public String getName() {
 		return name;
 	}

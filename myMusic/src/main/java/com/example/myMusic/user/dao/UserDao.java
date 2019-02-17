@@ -1,5 +1,7 @@
 package com.example.myMusic.user.dao;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -44,11 +46,11 @@ public interface UserDao extends PagingAndSortingRepository<User, Long>//分页�
                                  ,JpaSpecificationExecutor<User>//动态查询
 { 
 	@Query("from User u where u.name = ?1")
-	User findByUsername(String username);
+	List<User> findByUsername(String username);
 	@Query("from User u where u.phone = ?1")
-	User findByUserphone(String userphone);
+	List<User> findByUserphone(String userphone);
 	@Query("from User u where u.email = ?1")
-	User findByUseremail(String useremail);
+	List<User> findByUseremail(String useremail);
       
       
       
