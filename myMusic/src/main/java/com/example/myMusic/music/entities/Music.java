@@ -1,9 +1,15 @@
 package com.example.myMusic.music.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.example.myMusic.common.util.BaseEntity;
+import com.example.myMusic.discuss.entities.Discuss;
+import com.example.myMusic.reply.entities.Reply;
 
 @Entity
 @Table(name="music")
@@ -17,7 +23,22 @@ public class Music extends BaseEntity{
 	private String genre;//流派
 	private String region;//地区
 	private String theme;//主题
+	private Integer time=null;//时长
+	private List<Discuss> discusslist=new ArrayList<Discuss>();//该歌的所有评论
 	
+	@OneToMany(mappedBy="music")
+	public List<Discuss> getDiscusslist() {
+		return discusslist;
+	}
+	public void setDiscusslist(List<Discuss> discusslist) {
+		this.discusslist = discusslist;
+	}
+	public Integer getTime() {
+		return time;
+	}
+	public void setTime(Integer time) {
+		this.time = time;
+	}
 	public String getName() {
 		return name;
 	}

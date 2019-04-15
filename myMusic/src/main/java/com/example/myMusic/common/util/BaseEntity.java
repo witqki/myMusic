@@ -14,8 +14,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @MappedSuperclass
 public class BaseEntity {
 	protected Long id = null;
-	protected Date createTime = null;
-	protected Date updateTime = null;
+	protected Date createTime = new Date();
+	protected Date updateTime = new Date();
 
 	public BaseEntity() {
 	}
