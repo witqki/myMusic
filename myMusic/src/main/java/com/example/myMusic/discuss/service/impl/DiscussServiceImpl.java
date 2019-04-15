@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.myMusic.common.dto.discuss.DiscussDTO;
+import com.example.myMusic.common.dto.discuss.DiscussPageDTO;
 import com.example.myMusic.common.dto.discuss.DiscussRequestDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
 import com.example.myMusic.common.util.BeanUtil;
@@ -75,7 +76,8 @@ public class DiscussServiceImpl implements DiscussService{
 			music.getDiscusslist().add(discuss);
 			musicDao.save(music);
 		}
-		discuss.setContent(discussRequestDTO.getContent().trim());
+		discuss.setContent(discussRequestDTO.getContent());
+		discuss.setLikernumber(new Integer(0));
 		discussDao.save(discuss);		
 		extAjaxResponse.setMsg("评论成功");
 		extAjaxResponse.setSuccess(true);
@@ -197,12 +199,57 @@ public class DiscussServiceImpl implements DiscussService{
         	discussResponseDTO.setSuccess(false);
         else
         	discussResponseDTO.setSuccess(true);
-		discussResponseDTO.setDiscussdtolist(discussdtolist);;
+		discussResponseDTO.setDiscussdtolist(discussdtolist);
 		discussResponseDTO.setNownumber(discussList.getContent().size());
 		discussResponseDTO.setNowpage(discussList.getNumber()+1);
 		//discussResponseDTO.setSuccess(false);
-		discussResponseDTO.setTotalnumber(discussList.getTotalElements()+1);
+		discussResponseDTO.setTotalnumber(((int)discussList.getTotalElements())+1);
 		discussResponseDTO.setTotalpage(discussList.getTotalPages());
+		return discussResponseDTO;
+	}
+    
+	@Override
+	public DiscussResponseDTO getDiscusspage(DiscussPageDTO discussPageDTO) {
+		// TODO Auto-generated method stub
+		DiscussResponseDTO discussResponseDTO=new DiscussResponseDTO();
+		if(discussPageDTO.getMusic_id().equals(0L)) {
+			discussResponseDTO.setSuccess(false);
+			discussResponseDTO.setMsg("传入的音乐id为空");
+			return discussResponseDTO;
+		}
+		
+		if(musicDao.existsById(discussPageDTO.getMusic_id())) {
+		    Music music=musicDao.findById(discussPageDTO.getMusic_id()).get();
+		    List<Discuss> discusslist=music.getDiscusslist();
+		    if(discusslist.size()==0) {
+	        	discussResponseDTO.setSuccess(false);
+	        	discussResponseDTO.setMsg("没有数据！");
+				return discussResponseDTO;
+			}
+		    //获取分页后的数据
+		    List<Discuss> pagelist=BeanUtil.fenye(discusslist,discussPageDTO.getPage());
+		    List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
+			for(Discuss discuss:pagelist) {
+				DiscussDTO discussDTO=new DiscussDTO();
+				BeanUtil.discussTodiscussDTO(discuss, discussDTO);
+				discussdtolist.add(discussDTO);
+			}
+			
+	      
+	        discussResponseDTO.setSuccess(true);
+			discussResponseDTO.setDiscussdtolist(discussdtolist);;
+			discussResponseDTO.setNownumber(pagelist.size());
+			discussResponseDTO.setNowpage(BeanUtil.nowpage(discusslist,discussPageDTO.getPage()));
+			discussResponseDTO.setTotalnumber(discusslist.size());
+			discussResponseDTO.setTotalpage(BeanUtil.pageTotal(discusslist));
+				
+			if(discussResponseDTO.getNowpage()==discussResponseDTO.getTotalpage())
+				discussResponseDTO.setMsg("已经到底了！");
+			return discussResponseDTO;
+		    
+		}
+		discussResponseDTO.setSuccess(false);
+		discussResponseDTO.setMsg("此音乐不存在");
 		return discussResponseDTO;
 	}
     

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.myMusic.common.dto.LikeDTO;
 import com.example.myMusic.common.dto.discuss.DiscussDTO;
+import com.example.myMusic.common.dto.discuss.DiscussPageDTO;
 import com.example.myMusic.common.dto.discuss.DiscussRequestDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
 import com.example.myMusic.common.web.ExtAjaxResponse;
@@ -65,13 +66,16 @@ public class DiscussController {
 	}
 	
 	@GetMapping(value="{page}")
-	public DiscussResponseDTO pageList(@PathVariable ("page") int pagenumber){
-		
+	public DiscussResponseDTO pageList(@PathVariable ("page") int pagenumber){		
 		//DiscussResponseDTO discussResponseDTO=discussService.getpage(pagenumber);
-		//List<DiscussResponseDTO> discussResponseDTO=new ArrayList<DiscussResponseDTO>();
-		
-		return discussService.getpage(pagenumber);
-		
+		//List<DiscussResponseDTO> discussResponseDTO=new ArrayList<DiscussResponseDTO>();		
+		return discussService.getpage(pagenumber);		
+	}
+	
+	//以音乐id和页数返回相应的评论
+	@GetMapping(value="/getDiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
+	public DiscussResponseDTO getDiscusspage(@RequestBody DiscussPageDTO discussPageDTO) {		
+		return discussService.getDiscusspage(discussPageDTO);	
 	}
 	
 	
