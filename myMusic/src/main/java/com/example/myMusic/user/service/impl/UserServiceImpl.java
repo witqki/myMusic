@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService{
 			logger.info("this is :"+userlogindto.getMessage());
 			if(userlogindto.getMessage().trim()==null||userlogindto.getMessage().trim().equals(""))
 			{
-				extAjaxResponse.setMsg("输入用户名为空！");
+				extAjaxResponse.setMsg("输入用户名为空！"+userlogindto.getMessage());
 				extAjaxResponse.setSuccess(false);
 			}else if(userlogindto.getPassword().trim()==null||userlogindto.getPassword().trim().equals("")) {
 				extAjaxResponse.setMsg("输入密码为空！");
@@ -95,8 +95,9 @@ public class UserServiceImpl implements UserService{
 			}
 			
 			else {
-				user=userDao.findByUsername(userlogindto.getMessage().trim()).get(0);
-				if(user!=null) {
+				List<User> list=userDao.findByUsername(userlogindto.getMessage().trim());
+				if(list.size()!=0&&list!=null) {
+					user=list.get(0);
 					if(user.getPassword().equals(userlogindto.getPassword().trim()))
 					{
 						extAjaxResponse.setMsg("登录成功！");
@@ -107,7 +108,7 @@ public class UserServiceImpl implements UserService{
 						extAjaxResponse.setSuccess(false);
 					}
 				}else {
-					extAjaxResponse.setMsg("系统查无此账号！"+userlogindto.getMessage());
+					extAjaxResponse.setMsg("系统查无此账号！");
 					extAjaxResponse.setSuccess(false);
 				}
 			}
@@ -124,8 +125,9 @@ public class UserServiceImpl implements UserService{
 			}
 			
 			else {
-				user=userDao.findByUserphone(userlogindto.getMessage().trim()).get(0);
-				if(user!=null) {
+				List<User> list=userDao.findByUserphone(userlogindto.getMessage().trim());
+				if(list.size()!=0&&list!=null) {
+					user=list.get(0);
 					if(user.getPassword().equals(userlogindto.getPassword().trim()))
 					{
 						extAjaxResponse.setMsg("登录成功！");
@@ -151,8 +153,9 @@ public class UserServiceImpl implements UserService{
 			}
 			
 			else {
-				user=userDao.findByUseremail(userlogindto.getMessage().trim()).get(0);
-				if(user!=null) {
+				List<User> list=userDao.findByUseremail(userlogindto.getMessage().trim());
+				if(list.size()!=0&&list!=null) {
+					user=list.get(0);
 					if(user.getPassword().equals(userlogindto.getPassword().trim()))
 					{
 						extAjaxResponse.setMsg("登录成功！");

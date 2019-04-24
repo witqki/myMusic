@@ -23,16 +23,16 @@ public class UserController {
 	@Autowired
 	private UserService userService=null;
 	
-	 @GetMapping
+	 @GetMapping(value="/test")
 	 public String hello() {
-		 return "啊";
+		 return "hello";
 	 }
-	 
+	
 	 @PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	 public ExtAjaxResponse userlogin(@RequestBody UserloginDTO userlogindto) {
 		 
 		 ExtAjaxResponse extAjaxResponse= userService.userlogin(userlogindto);
-		 
+		
 		 return extAjaxResponse;
 	 }
 	 

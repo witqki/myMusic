@@ -1,19 +1,13 @@
-package com.example.myMusic.music.entities;
+package com.example.myMusic.common.dto.music;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import com.example.myMusic.common.util.BaseEntity;
-import com.example.myMusic.discuss.entities.Discuss;
 
-@Entity
-@Table(name="music")
-public class Music extends BaseEntity{
-        
+
+
+public class SearchMusicDTO extends BaseEntity{
 	private String name;//歌名
 	private String path;//存放地址
 	private String singer;//歌手
@@ -24,27 +18,8 @@ public class Music extends BaseEntity{
 	private String theme;//主题
 	private String Date;//发行日期
 	private Integer time=null;//时长
-	private List<Discuss> discusslist=new ArrayList<Discuss>();//该歌的所有评论
-	@OneToMany(mappedBy="music")
-	public List<Discuss> getDiscusslist() {
-		return discusslist;
-	}
-	public void setDiscusslist(List<Discuss> discusslist) {
-		this.discusslist = discusslist;
-	}
-	public String getDate() {
-		return Date;
-	}
-	public void setDate(String date) {
-		Date = date;
-	}
-	public Integer getTime() {
-		return time;
-	}
-	public void setTime(Integer time) {
-		this.time = time;
-	}
-
+	private List<Long> discussids;
+	//private List<Discuss> discusslist=new ArrayList<Discuss>();//该歌的所有评论
 	public String getName() {
 		return name;
 	}
@@ -93,15 +68,23 @@ public class Music extends BaseEntity{
 	public void setTheme(String theme) {
 		this.theme = theme;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	public String getDate() {
+		return Date;
+	}
+	public void setDate(String date) {
+		Date = date;
+	}
+	public Integer getTime() {
+		return time;
+	}
+	public void setTime(Integer time) {
+		this.time = time;
+	}
+	public List<Long> getDiscussids() {
+		return discussids;
+	}
+	public void setDiscussids(List<Long> discussids) {
+		this.discussids = discussids;
+	}
 	
 }
