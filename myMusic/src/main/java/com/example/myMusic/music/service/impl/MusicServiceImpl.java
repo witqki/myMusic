@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.myMusic.common.dto.music.SearchMusicDTO;
 import com.example.myMusic.common.dto.music.SearchResponseDTO;
+import com.example.myMusic.common.util.BeanUtil;
 import com.example.myMusic.common.web.ExtAjaxResponse;
 import com.example.myMusic.discuss.entities.Discuss;
 import com.example.myMusic.music.dao.MusicDao;
@@ -23,7 +24,8 @@ import com.example.myMusic.music.service.MusicService;
 @Service
 @Transactional
 public class MusicServiceImpl implements MusicService{
-	private String url="http://39.96.172.186:8080/";
+	
+	
 	@Autowired
 	private MusicDao musicDao=null;
 	
@@ -171,7 +173,7 @@ public class MusicServiceImpl implements MusicService{
 				File file=new File(music.getPath());
 				if(file.exists()) {
 					
-					extAjaxResponse.setMsg(url+file.getName());
+					extAjaxResponse.setMsg(music.getPath().replace(BeanUtil.getRootUrl(), BeanUtil.getUrl()));
 					extAjaxResponse.setSuccess(true);
 				}else {
 					extAjaxResponse.setMsg("存放该歌曲的地址不正确！");
@@ -187,5 +189,15 @@ public class MusicServiceImpl implements MusicService{
 			extAjaxResponse.setSuccess(false);
 		}
 		return extAjaxResponse;
+	}
+
+	@Override
+	public boolean save(Music music) {
+		if(music!=null) {
+		   musicDao.save(music);
+		   return true;
+		}else {
+		   return false;
+		}
 	}
 }

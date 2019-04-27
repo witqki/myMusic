@@ -20,6 +20,7 @@ import com.example.myMusic.common.dto.discuss.DiscussDTO;
 import com.example.myMusic.common.dto.discuss.DiscussPageDTO;
 import com.example.myMusic.common.dto.discuss.DiscussRequestDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
+import com.example.myMusic.common.dto.mix_discuss_reply.MixrspDTO;
 import com.example.myMusic.common.web.ExtAjaxResponse;
 import com.example.myMusic.discuss.entities.Discuss;
 import com.example.myMusic.discuss.service.DiscussService;
@@ -77,6 +78,11 @@ public class DiscussController {
 	public DiscussResponseDTO getDiscusspage(@RequestBody DiscussPageDTO discussPageDTO) {		
 		return discussService.getDiscusspage(discussPageDTO);	
 	}
-	
-	
+	//返回融合后的评论与回复数据
+	@GetMapping(value="/mixdiscuss/{songid}/{page}") 
+	public MixrspDTO mixdiscuss(@PathVariable("songid") Long songid,@PathVariable("page") int page) {
+		
+		return discussService.mixdiscuss(songid,page);
+		
+	}
 }

@@ -1,6 +1,9 @@
 package com.example.myMusic.discuss.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +18,10 @@ import com.example.myMusic.common.dto.discuss.DiscussDTO;
 import com.example.myMusic.common.dto.discuss.DiscussPageDTO;
 import com.example.myMusic.common.dto.discuss.DiscussRequestDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
+import com.example.myMusic.common.dto.mix_discuss_reply.IdDTO;
+import com.example.myMusic.common.dto.mix_discuss_reply.IsreplyDTO;
+import com.example.myMusic.common.dto.mix_discuss_reply.MixDTO;
+import com.example.myMusic.common.dto.mix_discuss_reply.MixrspDTO;
 import com.example.myMusic.common.util.BeanUtil;
 import com.example.myMusic.common.web.ExtAjaxResponse;
 import com.example.myMusic.discuss.dao.DiscussDao;
@@ -252,6 +259,164 @@ public class DiscussServiceImpl implements DiscussService{
 		discussResponseDTO.setSuccess(false);
 		discussResponseDTO.setMsg("此音乐不存在");
 		return discussResponseDTO;
+	}
+
+	@Override
+	public MixrspDTO mixdiscuss(Long songid,int page) {
+		// TODO Auto-generated method stub
+		MixrspDTO mixrspDTO=new MixrspDTO();
+		if(songid.equals(0L)) {
+			mixrspDTO.setSuccess(false);
+			mixrspDTO.setMsg("传入数据发生错误！");
+			//mixrspDTO.setMsg("暂无评论！");
+		}
+		
+		else {
+			if(musicDao.existsById(songid)) {
+				Music music=musicDao.findById(songid).get();
+				List<Discuss> discusslist=music.getDiscusslist();
+				
+				if(discusslist.size()!=0&&discusslist!=null) {
+					List<IdDTO> idlist=new ArrayList<IdDTO>();
+					for(Discuss discuss:discusslist) {
+						IdDTO iddis=new IdDTO();
+						iddis.setId(discuss.getId());
+						Date date=discuss.getCreateTime();
+						if(date!=null) {
+							iddis.setDate(date);
+						}else {
+							mixrspDTO.setSuccess(false);
+							mixrspDTO.setMsg("存在评论"+discuss.getId()+"无对应创建时间！");
+							return mixrspDTO;
+						}
+						
+						idlist.add(iddis);
+						List<Reply> replylist=discuss.getReplylist();
+						//评论内有回复就进行操作
+						if(replylist.size()!=0&&replylist!=null) {						
+							for(Reply reply:replylist) {
+								IdDTO idreply=new IdDTO();
+								Date d=reply.getCreateTime();
+								if(d!=null) {
+									idreply.setDate(d);
+								}else {
+									mixrspDTO.setSuccess(false);
+									mixrspDTO.setMsg("存在回复"+reply.getId()+"无对应创建时间！");
+									return mixrspDTO;
+								}
+								
+								idreply.setId(reply.getId());
+								idreply.setIsreply(true);
+								idlist.add(idreply);
+							}
+						}
+					}
+					List<IdDTO> iddto=BeanUtil.sortlist(idlist);
+//					Collections.sort(iddto, new Comparator<IdDTO>() {//降序排序，按里面的Date排
+//			            @Override
+//			            public int compare(IdDTO o1, IdDTO o2) {
+//			                int flag = o1.getDate().compareTo(o2.getDate());
+//			                if(flag == -1){//
+//			                    flag = 1;
+//			                }else if(flag == 1){
+//			                    flag = -1;
+//			                }//把这段删除就成升序排序
+//			                return flag;
+//			            }
+//			        });
+					mixrspDTO.setCount(iddto.size());
+					mixrspDTO.setNowpage(BeanUtil.nowpage(iddto, page));
+					mixrspDTO.setPageTotal(BeanUtil.pageTotal(iddto));
+					 List<IdDTO> pagelist=BeanUtil.fenye(iddto,page);
+					 if(pagelist.size()==0||pagelist==null) {
+						 mixrspDTO.setSuccess(false);
+							mixrspDTO.setMsg("分页时发生未知错误！");
+							return mixrspDTO;
+					 }
+					 List<MixDTO> mixdto= new ArrayList<MixDTO>();
+					for(IdDTO i:pagelist) {
+						MixDTO mixDTO=new MixDTO();
+						if(i.isIsreply()) { //这是回复的话
+							if(replyDao.existsById(i.getId())) {
+							   Reply reply=replyDao.findById(i.getId()).get();
+							   mixDTO.setContent(reply.getContent());
+							   mixDTO.setSendtime(reply.getCreateTime());
+							   mixDTO.setIsreply(true);
+							   mixDTO.setLikernumber(reply.getLikernumber());
+							   User user_in_reply=reply.getUser();
+							   if(user_in_reply==null) {
+								   mixrspDTO.setSuccess(false);
+									mixrspDTO.setMsg("存在id为"+i.getId()+"的回复数据无对应用户");
+									return mixrspDTO;
+							   }else {
+								   mixDTO.setUserId(user_in_reply.getId());
+								   mixDTO.setUsername(user_in_reply.getName());
+							   }
+							   Discuss discuss_in_reply=reply.getDiscuss();
+							   if(discuss_in_reply==null) {
+								   mixrspDTO.setSuccess(false);
+									mixrspDTO.setMsg("存在id为"+i.getId()+"的回复数据无对应评论");
+									return mixrspDTO;
+							   }else {
+								   IsreplyDTO isreplyDTO=new IsreplyDTO();
+								   isreplyDTO.setContent(discuss_in_reply.getContent());
+								   User user_in_reply_discuss=discuss_in_reply.getUser();
+								   if(user_in_reply_discuss==null) {
+									   mixrspDTO.setSuccess(false);
+										mixrspDTO.setMsg("存在id为"+i.getId()+"的回复数据对应的id为"+discuss_in_reply.getId()+"评论数据无对应用户");
+										return mixrspDTO;
+								   }else {
+								      isreplyDTO.setUserId(user_in_reply_discuss.getId());
+								      isreplyDTO.setUsername(user_in_reply_discuss.getName());
+								   }
+								   mixDTO.setIsreplyDTO(isreplyDTO);
+								   mixdto.add(mixDTO);
+							   }
+							}else {
+								    mixrspDTO.setSuccess(false);
+									mixrspDTO.setMsg("不存在id为"+i.getId()+"的回复数据");
+									return mixrspDTO;
+							}
+						}else {//这是评论的话
+							if(discussDao.existsById(i.getId())) {
+								Discuss discuss=discussDao.findById(i.getId()).get();
+								mixDTO.setContent(discuss.getContent());
+								mixDTO.setLikernumber(discuss.getLikernumber());
+								mixDTO.setSendtime(discuss.getCreateTime());
+								User user_in_discuss=discuss.getUser();
+								if(user_in_discuss==null) {
+									mixrspDTO.setSuccess(false);
+									mixrspDTO.setMsg("id为"+i.getId()+"的评论数据无对应用户");
+									return mixrspDTO;
+								}else {
+									mixDTO.setUserId(user_in_discuss.getId());
+									mixDTO.setUsername(user_in_discuss.getName());
+									
+								}
+								 mixdto.add(mixDTO);
+							}else {
+								    mixrspDTO.setSuccess(false);
+									mixrspDTO.setMsg("不存在id为"+i.getId()+"的评论数据");
+									return mixrspDTO;
+							}
+						}
+						
+					}
+					mixrspDTO.setMsg("success");
+					mixrspDTO.setSuccess(true);
+					mixrspDTO.setMixdto(mixdto);
+
+				}else {
+					mixrspDTO.setCount(new Integer(0));
+					mixrspDTO.setSuccess(true);
+					mixrspDTO.setMsg("暂无评论！");
+				}
+			}else {
+				mixrspDTO.setSuccess(false);
+				mixrspDTO.setMsg("数据库查无此歌曲！");
+			}
+		}
+		return mixrspDTO;
 	}
     
     

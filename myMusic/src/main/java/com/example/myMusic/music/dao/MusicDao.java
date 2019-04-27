@@ -17,4 +17,7 @@ public interface MusicDao extends PagingAndSortingRepository<Music, Long>//分�
 	//暂时只查询歌名、歌手、专辑、主题
 		@Query(value="from  Music s where s.name like %:Content% or s.singer like %:Content% or s.album like %:Content% or s.theme like %:Content% ")
 		 List<Music> searchContent(@Param("Content") String searchContent);
+		//检测歌曲地址是否存在
+		@Query(value="from  Music s where s.path like %:path% ")
+		 List<Music> exitMusicpath(@Param("path") String path);
 }
