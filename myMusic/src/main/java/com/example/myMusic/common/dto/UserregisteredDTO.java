@@ -5,7 +5,7 @@ public class UserregisteredDTO {
 	private String name;
     private String password;
     private String cpassword;
-    private Integer sex;
+    private boolean sex;
     private String phone;
     private String email;
 	public String getName() {
@@ -26,10 +26,11 @@ public class UserregisteredDTO {
 	public void setCpassword(String cpassword) {
 		this.cpassword = cpassword;
 	}
-	public Integer getSex() {
+
+	public boolean isSex() {
 		return sex;
 	}
-	public void setSex(Integer sex) {
+	public void setSex(boolean sex) {
 		this.sex = sex;
 	}
 	public String getPhone() {

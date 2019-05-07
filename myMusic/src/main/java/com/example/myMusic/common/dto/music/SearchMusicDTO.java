@@ -8,6 +8,7 @@ import com.example.myMusic.common.util.BaseEntity;
 
 
 public class SearchMusicDTO extends BaseEntity{
+	private Long trueid;//真实网易云id
 	private String name;//歌名
 	private String path;//存放地址
 	private String singer;//歌手
@@ -18,10 +19,61 @@ public class SearchMusicDTO extends BaseEntity{
 	private String theme;//主题
 	private String Date;//发行日期
 	private Integer time=null;//时长
+	private String picturepath;
+	private Integer amount_play=null;//播放量
 	private List<Long> discussids;
 	//private List<Discuss> discusslist=new ArrayList<Discuss>();//该歌的所有评论
+
+	
 	public String getName() {
 		return name;
+	}
+	public Long getTrueid() {
+		return trueid;
+	}
+	public void setTrueid(Long trueid) {
+		this.trueid = trueid;
+	}
+	public Integer getAmount_play() {
+		return amount_play;
+	}
+	public void setAmount_play(Integer amount_play) {
+		this.amount_play = amount_play;
+	}
+	public SearchMusicDTO() {
+		
+	}
+	public SearchMusicDTO(Long id,String name, String singer, 
+			 Integer time, String picturepath,Integer amount_play) {
+		this.id=id;
+		this.name = name;
+		this.singer = singer;
+		this.time = time;
+		this.picturepath = picturepath;
+		this.amount_play = amount_play;
+	
+	}
+	public SearchMusicDTO(String name, String path, String singer, String album, String language, String genre,
+			String region, String theme, String date, Integer time, String picturepath, List<Long> discussids) {
+		super();
+		this.name = name;
+		this.path = path;
+		this.singer = singer;
+		this.album = album;
+		this.language = language;
+		this.genre = genre;
+		this.region = region;
+		this.theme = theme;
+		Date = date;
+		this.time = time;
+		this.picturepath = picturepath;
+		this.discussids = discussids;
+	}
+	public String getPicturepath() {
+		return picturepath;
+	}
+	public void setPicturepath(String picturepath) {
+		this.picturepath = picturepath;
 	}
 	public void setName(String name) {
 		this.name = name;

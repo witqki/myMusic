@@ -12,25 +12,25 @@ import com.example.myMusic.user.entities.User;
 @Entity
 @Table(name="reply")
 public class Reply extends BaseEntity{
-	 private User user;  //该回复的用户
-	 private Discuss discuss;//这条回复属于的那个评论的
+	// private User user;  //该回复的用户
+	// private Discuss discuss;//这条回复属于的那个评论的
 	 private String content;//回复的内容
 	 private Integer likernumber=null;//点赞人数
 	 
-	 @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	public User getUser() {
-		return user;
-	}
-	public void setUser(User user) {
-		this.user = user;
-	}
-	 @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	public Discuss getDiscuss() {
-		return discuss;
-	}
-	public void setDiscuss(Discuss discuss) {
-		this.discuss = discuss;
-	}
+//	 @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//	public User getUser() {
+//		return user;
+//	}
+//	public void setUser(User user) {
+//		this.user = user;
+//	}
+//	 @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//	public Discuss getDiscuss() {
+//		return discuss;
+//	}
+//	public void setDiscuss(Discuss discuss) {
+//		this.discuss = discuss;
+//	}
 	
 	public String getContent() {
 		return content;

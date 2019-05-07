@@ -6,10 +6,7 @@ import java.util.List;
 public class DiscussResponseDTO {
 	   private boolean success;//请求是否成功
        private String msg="";
-	   private int totalpage;//总页数
-       private int totalnumber;//总记录数
-       private int nowpage;//当前页数
-       private int nownumber;//当前页面记录数
+
        private List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
        public boolean isSuccess() {
    		return success;
@@ -24,30 +21,30 @@ public class DiscussResponseDTO {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
-	public int getTotalpage() {
-		return totalpage;
-	}
-	public void setTotalpage(int totalpage) {
-		this.totalpage = totalpage;
-	}
-	public int getTotalnumber() {
-		return totalnumber;
-	}
-	public void setTotalnumber(int totalnumber) {
-		this.totalnumber = totalnumber;
-	}
-	public int getNowpage() {
-		return nowpage;
-	}
-	public void setNowpage(int nowpage) {
-		this.nowpage = nowpage;
-	}
-	public int getNownumber() {
-		return nownumber;
-	}
-	public void setNownumber(int nownumber) {
-		this.nownumber = nownumber;
-	}
+//	public int getTotalpage() {
+//		return totalpage;
+//	}
+//	public void setTotalpage(int totalpage) {
+//		this.totalpage = totalpage;
+//	}
+//	public int getTotalnumber() {
+//		return totalnumber;
+//	}
+//	public void setTotalnumber(int totalnumber) {
+//		this.totalnumber = totalnumber;
+//	}
+//	public int getNowpage() {
+//		return nowpage;
+//	}
+//	public void setNowpage(int nowpage) {
+//		this.nowpage = nowpage;
+//	}
+//	public int getNownumber() {
+//		return nownumber;
+//	}
+//	public void setNownumber(int nownumber) {
+//		this.nownumber = nownumber;
+//	}
 	public List<DiscussDTO> getDiscussdtolist() {
 		return discussdtolist;
 	}

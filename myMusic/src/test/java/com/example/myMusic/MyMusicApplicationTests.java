@@ -29,12 +29,14 @@ public class MyMusicApplicationTests {
 //		System.out.println(BeanUtil.readAllfile(path));
 //		System.out.println("---------------");
 //		System.out.println(BeanUtil.filter(BeanUtil.readAllfile(path)));
-		String path="E-kids - 玩玩具.mp3";
-		String mp3path="G://KuGou/"+path;
-		 File file=new File(mp3path);
-		Music music=BeanUtil.readMp3(mp3path);
-		musicDao.save(music);
+//		String path="E-kids - 玩玩具.mp3";
+//		String mp3path="G://KuGou/"+path;
+//		 File file=new File(mp3path);
+//		Music music=BeanUtil.readMp3(mp3path);
+//		musicDao.save(music);
 		//System.out.println(BeanUtil.isNull(""));
+		
+		System.out.println("fdg");
 	}
 	
 	

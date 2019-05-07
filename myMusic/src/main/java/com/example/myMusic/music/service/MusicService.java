@@ -15,6 +15,9 @@ public interface MusicService {
    public boolean existsById(Long id);
    public boolean save(Music music);
    public SearchResponseDTO searchContent(String searchcontent);
-   public ExtAjaxResponse downsong(HttpServletResponse response, Long songid);
-   public ExtAjaxResponse playsong(Long songid);
+//   public ExtAjaxResponse downsong(HttpServletResponse response, Long songid);
+//   public ExtAjaxResponse playsong(Long songid);
+//   
+//   public SearchResponseDTO songlist(Long id);
+
 }

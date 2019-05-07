@@ -61,28 +61,34 @@ public class MusicController {
 //		        return "fail";
 //		    }
 	}
+	//用户查看歌曲
 	@GetMapping(value="/search")
 	public SearchResponseDTO searchmusic( HttpServletResponse response,String searchcontent) {	
-		SearchResponseDTO rsp= musicService. searchContent(searchcontent);		
-		return  rsp;
-	}
-	//返回下载流
-	@GetMapping(value="/downsong/{songid}")
-	public ExtAjaxResponse downsong(HttpServletResponse response,@PathVariable ("songid") Long songid) {
-         return musicService.downsong(response, songid);	
-	}
-	@GetMapping(value="/playsong/{songid}")
-	public ExtAjaxResponse playsong(@PathVariable("songid") Long songid) {
 		
-		return musicService.playsong(songid);
+		return  musicService. searchContent(searchcontent);
 	}
+//	//返回下载流
+//	@GetMapping(value="/downsong/{songid}")
+//	public ExtAjaxResponse downsong(HttpServletResponse response,@PathVariable ("songid") Long songid) {
+//         return musicService.downsong(response, songid);	
+//	}
+//	@GetMapping(value="/playsong/{songid}")
+//	public ExtAjaxResponse playsong(@PathVariable("songid") Long songid) {
+//		
+//		return musicService.playsong(songid);
+//	}
+	//热歌1
+	//新歌2
+	//国内榜3
+	//欧美榜 Occident4
+	//韩国榜Korean5
+	//日本榜Japanese6
+//	@GetMapping(value="/songlist/{id}")
+//    public SearchResponseDTO songlist(@PathVariable("id") Long id) {
+//		return  musicService.songlist(id);
+//	}
 	
-//	 @PostMapping(value="/addsong",consumes=MediaType.APPLICATION_JSON_VALUE)
-//	 public ExtAjaxResponse Addsong(@RequestBody SongDTO songDTO) {
-//		
-//		 ExtAjaxResponse extAjaxResponse= musicService.Addsong(songDTO);
-//		
-//		 return extAjaxResponse;
-//	 }
+	
+	
 	
 }

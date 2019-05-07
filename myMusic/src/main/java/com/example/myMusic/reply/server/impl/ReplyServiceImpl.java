@@ -56,8 +56,8 @@ public class ReplyServiceImpl implements ReplyService{
 		Reply reply=new Reply();
 		if(userDao.existsById(replySaveDTO.getUser_id())) {
 			User user=userDao.findById(replySaveDTO.getUser_id()).get();
-			reply.setUser(user);
-			user.getReplyList().add(reply);
+		//	reply.setUser(user);
+		//	user.getReplylist().add(reply);
 			userDao.save(user);
 		}else {
 			extAjaxResponse.setMsg("该用户id不存在！");
@@ -66,8 +66,8 @@ public class ReplyServiceImpl implements ReplyService{
 		}
 		if(discussDao.existsById(replySaveDTO.getDiscuss_id())) {
 			Discuss discuss=discussDao.findById(replySaveDTO.getDiscuss_id()).get();
-			discuss.getReplylist().add(reply);
-			reply.setDiscuss(discuss);
+		//	discuss.getReplylist().add(reply);
+			//reply.setDiscuss(discuss);
 			discussDao.save(discuss);
 		}else {
 			extAjaxResponse.setMsg("该评论id不存在！");
@@ -93,18 +93,18 @@ public class ReplyServiceImpl implements ReplyService{
 		}
 		if(replyDao.existsById(id)) {
 			Reply reply=replyDao.findById(id).get();
-			User user=reply.getUser();
-			Discuss discuss=reply.getDiscuss();
-			if(user!=null) {
-				reply.setUser(null);
-				user.getReplyList().remove(reply);
-				userDao.save(user);
-			}
-			if(discuss!=null) {
-				reply.setDiscuss(null);
-				discuss.getReplylist().remove(reply);
-				discussDao.save(discuss);
-			}
+		//	User user=reply.getUser();
+			//Discuss discuss=reply.getDiscuss();
+			//if(user!=null) {
+			//	reply.setUser(null);
+			//	user.getReplylist().remove(reply);
+			//	userDao.save(user);
+		//	}
+		//	if(discuss!=null) {
+				//reply.setDiscuss(null);
+			//	discuss.getReplylist().remove(reply);
+			//	discussDao.save(discuss);
+		//	}
 			replyDao.save(reply);
 			replyDao.deleteById(id);
 			
@@ -170,25 +170,25 @@ public class ReplyServiceImpl implements ReplyService{
 		}
 		if(discussDao.existsById(replyPageDTO.getDiscuss_id())) {
 			Discuss discuss=discussDao.findById(replyPageDTO.getDiscuss_id()).get();
-			List<Reply> replylist=discuss.getReplylist();
-			if(replylist.size()==0) {
-				replyResponseDTO.setSuccess(false);
-				replyResponseDTO.setMsg("没有数据！");
-				return replyResponseDTO;
-			}
-			List<Reply> pagelist=BeanUtil.fenye(replylist,replyPageDTO.getPage());
+		//	List<Reply> replylist=discuss.getReplylist();
+//			if(replylist.size()==0) {
+//				replyResponseDTO.setSuccess(false);
+//				replyResponseDTO.setMsg("没有数据！");
+//				return replyResponseDTO;
+//			}
+//			List<Reply> pagelist=BeanUtil.fenye(replylist,replyPageDTO.getPage());
 			List<ReplyDTO> replydtolist=new ArrayList<ReplyDTO>();
-			for(Reply reply:pagelist) {
-				ReplyDTO replyDTO=new ReplyDTO();
-				BeanUtil.replyToreplyDTO(reply, replyDTO);
-				replydtolist.add(replyDTO);
-			}
+//			for(Reply reply:pagelist) {
+//				ReplyDTO replyDTO=new ReplyDTO();
+//				BeanUtil.replyToreplyDTO(reply, replyDTO);
+//				replydtolist.add(replyDTO);
+//			}
 			
 			replyResponseDTO.setSuccess(true);
 			replyResponseDTO.setDiscussdtolist(replydtolist);;
-			replyResponseDTO.setNownumber(pagelist.size());
+			//replyResponseDTO.setNownumber(pagelist.size());
 			replyResponseDTO.setNowpage(BeanUtil.nowpage(replydtolist,replyPageDTO.getPage()));
-			replyResponseDTO.setTotalnumber(replylist.size());
+		//	replyResponseDTO.setTotalnumber(replylist.size());
 			replyResponseDTO.setTotalpage(BeanUtil.pageTotal(replydtolist));
 				
 			if(replyResponseDTO.getNowpage()==replyResponseDTO.getTotalpage())

@@ -3,44 +3,88 @@ package com.example.myMusic.user.entities;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.example.myMusic.common.util.BaseEntity;
 import com.example.myMusic.discuss.entities.Discuss;
+import com.example.myMusic.music.entities.Music;
 import com.example.myMusic.reply.entities.Reply;
+import com.example.myMusic.songList.entities.SongList;
 @Entity
 @Table(name="user")
 public class User extends BaseEntity{
 	
 	 private String name;
      private String password;
-     private Integer sex;
+     private boolean sex;
      private String phone;
      private String email;
-     private String headUrl;//头像地址
-     private List<Discuss> discussList=new ArrayList<Discuss>();//用户的评论
-     private List<Reply> replyList=new ArrayList<Reply>();//用户的回复
+    // private String pictureUrl;//头像地址
+     private boolean isadmin=false;//是否普通管理员
+     private boolean iswrite=true;//是否能发评论
+     private boolean isapply=true;//能否申请歌单分享
+     private List<Discuss> discusslist=new ArrayList<Discuss>();//用户的评论  
+     private List<SongList> songlist=new ArrayList<SongList>();//歌单
+     private List<Music> musiclist=new ArrayList<Music>();//自己收藏的歌曲
+
      
-     @OneToMany(mappedBy="user")
-	public List<Discuss> getDiscussList() {
-		return discussList;
+ 
+	public boolean isIsadmin() {
+		return isadmin;
 	}
-	public void setDiscussList(List<Discuss> discussList) {
-		this.discussList = discussList;
+	public void setIsadmin(boolean isadmin) {
+		this.isadmin = isadmin;
+	}
+	public boolean isIswrite() {
+		return iswrite;
+	}
+	public void setIswrite(boolean iswrite) {
+		this.iswrite = iswrite;
+	}
+	public boolean isIsapply() {
+		return isapply;
+	}
+	public void setIsapply(boolean isapply) {
+		this.isapply = isapply;
 	}
 	@OneToMany(mappedBy="user")
-	public List<Reply> getReplyList() {
-		return replyList;
+	public List<Discuss> getDiscusslist() {
+		return discusslist;
 	}
-	public void setReplyList(List<Reply> replyList) {
-		this.replyList = replyList;
+	public void setDiscusslist(List<Discuss> discusslist) {
+		this.discusslist = discusslist;
 	}
-	public Integer getSex() {
+
+	@ManyToMany(mappedBy="userlist")
+	public List<SongList> getSonglist() {
+		return songlist;
+	}
+	public void setSonglist(List<SongList> songlist) {
+		this.songlist = songlist;
+	}
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	public List<Music> getMusiclist() {
+		return musiclist;
+	}
+	public void setMusiclist(List<Music> musiclist) {
+		this.musiclist = musiclist;
+	}
+	
+   
+
+	
+
+
+	
+	public boolean isSex() {
 		return sex;
 	}
-	public void setSex(Integer sex) {
+	public void setSex(boolean sex) {
 		this.sex = sex;
 	}
 	public String getName() {
@@ -67,10 +111,13 @@ public class User extends BaseEntity{
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public String getHeadUrl() {
-		return headUrl;
-	}
-	public void setHeadUrl(String headUrl) {
-		this.headUrl = headUrl;
-	}
+//	public String getPictureUrl() {
+//		return pictureUrl;
+//	}
+//	public void setPictureUrl(String pictureUrl) {
+//		this.pictureUrl = pictureUrl;
+//	}
+
+	
+	
 }

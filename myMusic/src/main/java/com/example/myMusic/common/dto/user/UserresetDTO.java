@@ -2,8 +2,7 @@ package com.example.myMusic.common.dto.user;
 
 public class UserresetDTO {
        private Integer id;
-       private String sender;
-     
+       private String sender; 
        private String code;
        private String psw;
        private String conpsw;

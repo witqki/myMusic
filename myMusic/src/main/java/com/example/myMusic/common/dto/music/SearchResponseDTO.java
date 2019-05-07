@@ -6,6 +6,7 @@ public class SearchResponseDTO {
      private boolean success;
      private String msg;
      private List<SearchMusicDTO> list;
+     
 	public boolean isSuccess() {
 		return success;
 	}

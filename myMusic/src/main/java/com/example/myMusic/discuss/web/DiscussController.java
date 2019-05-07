@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.myMusic.common.dto.LikeDTO;
 import com.example.myMusic.common.dto.discuss.DiscussDTO;
-import com.example.myMusic.common.dto.discuss.DiscussPageDTO;
+
 import com.example.myMusic.common.dto.discuss.DiscussRequestDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
 import com.example.myMusic.common.dto.mix_discuss_reply.MixrspDTO;
@@ -73,11 +73,11 @@ public class DiscussController {
 		return discussService.getpage(pagenumber);		
 	}
 	
-	//以音乐id和页数返回相应的评论
-	@GetMapping(value="/getDiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
-	public DiscussResponseDTO getDiscusspage(@RequestBody DiscussPageDTO discussPageDTO) {		
-		return discussService.getDiscusspage(discussPageDTO);	
-	}
+//	//以音乐id和页数返回相应的评论
+//	@GetMapping(value="/getDiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
+//	public DiscussResponseDTO getDiscusspage(@RequestBody DiscussPageDTO discussPageDTO) {		
+//		return discussService.getDiscusspage(discussPageDTO);	
+//	}
 	//返回融合后的评论与回复数据
 	@GetMapping(value="/mixdiscuss/{songid}/{page}") 
 	public MixrspDTO mixdiscuss(@PathVariable("songid") Long songid,@PathVariable("page") int page) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Set;
 
 import javax.mail.Message;
 import javax.mail.Session;
@@ -35,6 +36,7 @@ import org.jaudiotagger.tag.flac.FlacTag;
 import com.example.myMusic.common.dto.UserregisteredDTO;
 import com.example.myMusic.common.dto.discuss.DiscussDTO;
 import com.example.myMusic.common.dto.mix_discuss_reply.IdDTO;
+import com.example.myMusic.common.dto.music.SearchMusicDTO;
 import com.example.myMusic.common.dto.reply.ReplyDTO;
 import com.example.myMusic.common.web.ExtAjaxResponse;
 import com.example.myMusic.discuss.entities.Discuss;
@@ -43,9 +45,16 @@ import com.example.myMusic.reply.entities.Reply;
 import com.example.myMusic.user.entities.User;
 import com.sun.mail.util.MailSSLSocketFactory;
 
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
 public class BeanUtil {
 	//private String url="http://39.96.172.186:8080/";//外网
-	private static String rootUrl="G:/apache-tomcat-9.0.19-windows-x64/apache-tomcat-9.0.19/webapps/ROOT/";
+	private static String rootUrl="G:/apache-tomcat-9.0.19-windows-x64/apache-tomcat-9.0.19/webapps/ROOT/music/";
 	private static String url="http://localhost:8080/";//本地
 	private static long limittime=60*1000;//一分钟的毫秒
 	private static int pagesize=10;
@@ -59,10 +68,27 @@ public class BeanUtil {
 	public static String getRootUrl() {
 		return rootUrl;
 	}
+	
+	public static SearchMusicDTO MusicToSearchMusicDTO(Music music,SearchMusicDTO searchMusicDTO) {
+		searchMusicDTO.setId(music.getId());
+//		searchMusicDTO.setName(music.getName());
+//		searchMusicDTO.setSinger(music.getSinger());
+//		searchMusicDTO.setAlbum(music.getAlbum());
+//		searchMusicDTO.setPath(music.getPath());
+//		searchMusicDTO.setLanguage(music.getLanguage());
+//		searchMusicDTO.setGenre(music.getGenre());
+//		searchMusicDTO.setRegion(music.getRegion());
+//		searchMusicDTO.setTheme(music.getTheme());
+//		searchMusicDTO.setDate(music.getDate());
+//		searchMusicDTO.setTime(music.getTime());
+//		searchMusicDTO.setPicturepath(music.getPicturepath());
+//		searchMusicDTO.setAmount_play(music.getAmount_play());	
+		return searchMusicDTO;
+	}
     public static User UserregisteredDTOtoUser(UserregisteredDTO userregisteredDTO,User user) {
     	user.setName(userregisteredDTO.getName());
     	user.setPassword(userregisteredDTO.getPassword());
-    	user.setSex(userregisteredDTO.getSex());
+    	user.setSex(userregisteredDTO.isSex());
     	user.setPhone(userregisteredDTO.getPhone());
     	user.setEmail(userregisteredDTO.getEmail());
     	return user;
@@ -70,7 +96,7 @@ public class BeanUtil {
     public static void discussTodiscussDTO(Discuss discuss,DiscussDTO discussdto) {
     	discussdto.setId(discuss.getId());
     	discussdto.setContent(discuss.getContent());
-    	discussdto.setLikernumber(discuss.getLikernumber());
+    	//discussdto.setLikernumber(discuss.getLikernumber());
     }
     public static void replyToreplyDTO(Reply reply,ReplyDTO replydto) {
     	replydto.setId(reply.getId());
@@ -169,154 +195,154 @@ public class BeanUtil {
 		   }
 	   }
    }
-   //读取flac音频信息  //需要确认传入的地址一定有用才行
-   public static Music readflac(String flac) {
-	   Music music=new Music();
-	   try {
-		   music.setCreateTime(new Date());
-		   music.setUpdateTime(new Date());
-		   File file=new File(flac);
-		   String str= leftTorigth(file.getAbsolutePath());
-		   if(str!=null) {
-		   music.setPath(str);
-		   }
-		   FlacFileReader read=new FlacFileReader();
-		   AudioFile audioFile=read.read(file);
-		   AudioHeader audioHeader=audioFile.getAudioHeader();//时长在这里
-		   FlacTag flacTag=(FlacTag) audioFile.getTag();
-
-		   music.setTime(audioHeader.getTrackLength());//时长
-		   if(flacTag.hasField("TITLE")) {
-			   music.setName(flacTag.getFirst(FieldKey.TITLE));
-		   }else {
-			   music.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
-		   }
-		 //  System.out.println(flacTag.getFirst(FieldKey.TITLE));//歌名
-		   if(flacTag.hasField("ARTIST")) {
-			   music.setSinger(flacTag.getFirst(FieldKey.ARTIST));
-		   }else {
-			   music.setSinger("未知");
-		   }
-	//	    System.out.println( flacTag.getFirst(FieldKey.ARTIST));//歌手
-		   if(flacTag.hasField("ALBUM")) {
-			   music.setAlbum(flacTag.getFirst(FieldKey.ALBUM));
-		   }else {
-			   music.setAlbum("未知");
-		   }
-		//    System.out.println(flacTag.getFirst(FieldKey.ALBUM));//专辑
-		   if(flacTag.hasField("DATE")) {
-			   music.setDate(flacTag.getFirst("DATE"));
-		   }else {
-			   music.setDate("未知");
-		   }
-		   // System.out.println(flacTag.getFirst("DATE"));//发行日期
-		   if(flacTag.hasField("GENRE")) {
-			   music.setGenre(flacTag.getFirst(FieldKey.GENRE));
-		   }else {
-			   music.setGenre("未知");
-		   }
-		   if(flacTag.hasField("LANGUAGE")) {
-			   music.setLanguage(flacTag.getFirst(FieldKey.LANGUAGE));
-		   }else {
-			   music.setLanguage("未知");
-		   }
-		   if(flacTag.hasField("REGION")) {
-			   music.setRegion(flacTag.getFirst("REGION"));
-		   }else {
-			   music.setRegion("未知");
-		   }
-		   if(flacTag.hasField("THEME")) {
-			   music.setTheme(flacTag.getFirst("THEME"));
-		   }else {
-			   music.setTheme("未知");
-		   }
-		//    System.out.println(flacTag.getFirst(FieldKey.GENRE));//类型
-//		    System.out.println("乐队"+flacTag.getFirst("BAND"));//乐队
-//		    System.out.println( flacTag.getFirst("ALBUMARTIST"));//专辑艺术家
-//		    System.out.println(flacTag.getFirst(FieldKey.COMPOSER));//作曲家
-	   }catch(Exception e) {
-		   e.printStackTrace();
-	   }
-	   music.setCreateTime(new Date());
-	   music.setUpdateTime(new Date());
-       return music;
-   }
+//   //读取flac音频信息  //需要确认传入的地址一定有用才行
+//   public static Music readflac(String flac) {
+//	   Music music=new Music();
+//	   try {
+//		   music.setCreateTime(new Date());
+//		   music.setUpdateTime(new Date());
+//		   File file=new File(flac);
+//		   String str= leftTorigth(file.getAbsolutePath());
+//		   if(str!=null) {
+//		   music.setPath(str);
+//		   }
+//		   FlacFileReader read=new FlacFileReader();
+//		   AudioFile audioFile=read.read(file);
+//		   AudioHeader audioHeader=audioFile.getAudioHeader();//时长在这里
+//		   FlacTag flacTag=(FlacTag) audioFile.getTag();
+//
+//		   music.setTime(audioHeader.getTrackLength());//时长
+//		   if(flacTag.hasField("TITLE")) {
+//			   music.setName(flacTag.getFirst(FieldKey.TITLE));
+//		   }else {
+//			   music.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
+//		   }
+//		 //  System.out.println(flacTag.getFirst(FieldKey.TITLE));//歌名
+//		   if(flacTag.hasField("ARTIST")) {
+//			   music.setSinger(flacTag.getFirst(FieldKey.ARTIST));
+//		   }else {
+//			   music.setSinger("未知");
+//		   }
+//	//	    System.out.println( flacTag.getFirst(FieldKey.ARTIST));//歌手
+//		   if(flacTag.hasField("ALBUM")) {
+//			   music.setAlbum(flacTag.getFirst(FieldKey.ALBUM));
+//		   }else {
+//			   music.setAlbum("未知");
+//		   }
+//		//    System.out.println(flacTag.getFirst(FieldKey.ALBUM));//专辑
+//		   if(flacTag.hasField("DATE")) {
+//			   music.setDate(flacTag.getFirst("DATE"));
+//		   }else {
+//			   music.setDate("未知");
+//		   }
+//		   // System.out.println(flacTag.getFirst("DATE"));//发行日期
+//		   if(flacTag.hasField("GENRE")) {
+//			   music.setGenre(flacTag.getFirst(FieldKey.GENRE));
+//		   }else {
+//			   music.setGenre("未知");
+//		   }
+//		   if(flacTag.hasField("LANGUAGE")) {
+//			   music.setLanguage(flacTag.getFirst(FieldKey.LANGUAGE));
+//		   }else {
+//			   music.setLanguage("未知");
+//		   }
+//		   if(flacTag.hasField("REGION")) {
+//			   music.setRegion(flacTag.getFirst("REGION"));
+//		   }else {
+//			   music.setRegion("未知");
+//		   }
+//		   if(flacTag.hasField("THEME")) {
+//			   music.setTheme(flacTag.getFirst("THEME"));
+//		   }else {
+//			   music.setTheme("未知");
+//		   }
+//		//    System.out.println(flacTag.getFirst(FieldKey.GENRE));//类型
+////		    System.out.println("乐队"+flacTag.getFirst("BAND"));//乐队
+////		    System.out.println( flacTag.getFirst("ALBUMARTIST"));//专辑艺术家
+////		    System.out.println(flacTag.getFirst(FieldKey.COMPOSER));//作曲家
+//	   }catch(Exception e) {
+//		   e.printStackTrace();
+//	   }
+//	   music.setCreateTime(new Date());
+//	   music.setUpdateTime(new Date());
+//       return music;
+//   }
    
-   //读取MP3 //需要确认传入的地址一定有用才行
-   public static Music readMp3(String mp3path) {
-	  String chastset="gbk";//ISO-8859-1
-	   Music music=new Music();
-	   try {
-		   /*  简单mp3信息读取*/
-		   File file=new File(mp3path);
-		   String str= leftTorigth(file.getAbsolutePath());
-		   if(str!=null) {
-		     music.setPath(str);
-		   }
-		   MP3File MP3file = new MP3File(mp3path);
-			MP3AudioHeader header= (MP3AudioHeader)MP3file.getAudioHeader(); //获得头部信息
-			music.setTime(new Integer(header.getTrackLength()));
-		
-			byte[] buf=new byte[128];
-			 RandomAccessFile raf = new RandomAccessFile(mp3path, "r");
-			 raf.seek(raf.length()-128);
-			
-			 raf.read(buf);
-			 raf.close();
-			 if(buf.length!=128) {
-				 music.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
-				  music.setAlbum("未知");
-				  music.setSinger("未知");
-				  music.setDate("未知");
-				// System.out.println("数据长度不合法！");
-			 }
-			 else if(!"TAG".equalsIgnoreCase(new String(buf,0,3))){//标签头是否存在
-				// System.out.println("MP3标签信息数据格式不正确！");
-				 music.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
-				
-				  music.setAlbum("未知");
-				  music.setSinger("未知");
-				  music.setDate("未知");
-			    }	
-			 else 
-			 {
-				 String SongName = new String(buf,3,30,chastset).trim();//歌曲名称
-				 if(isNull(SongName)) {
-					 SongName=file.getName().substring(0, file.getName().lastIndexOf("."));
-				 }
-				// System.out.println(SongName);
-				 String Artist = new String(buf,33,30,chastset).trim();//歌手名字
-				 if(isNull(Artist)) {
-					 Artist="未知";
-				 }
-				 //System.out.println(Artist);
-				  String Album = new String(buf,63,30,chastset).trim();//专辑名称
-				  if(isNull(Album)) {
-					  Album="未知";
-					 }
-				 // System.out.println(Album);
-				  String Year = new String(buf,93,4,chastset).trim();//出品年份
-				  if(isNull(Year)) {
-					  Year="未知";
-					 }
-				 // System.out.println(Year);
-				  music.setName(SongName);
-				  music.setAlbum(Album);
-				  music.setSinger(Artist);
-				  music.setDate(Year);
-				
-			 }
-	   }catch(Exception e) {
-		   e.printStackTrace();
-	   }
-	   music.setGenre("未知");
-	   music.setLanguage("未知");
-	   music.setRegion("未知");
-	   music.setTheme("未知");
-	   music.setCreateTime(new Date());
-	   music.setUpdateTime(new Date());
-	   return music;
-   }
+//   //读取MP3 //需要确认传入的地址一定有用才行
+//   public static Music readMp3(String mp3path) {
+//	  String chastset="gbk";//ISO-8859-1
+//	   Music music=new Music();
+//	   try {
+//		   /*  简单mp3信息读取*/
+//		   File file=new File(mp3path);
+//		   String str= leftTorigth(file.getAbsolutePath());
+//		   if(str!=null) {
+//		     music.setPath(str);
+//		   }
+//		   MP3File MP3file = new MP3File(mp3path);
+//			MP3AudioHeader header= (MP3AudioHeader)MP3file.getAudioHeader(); //获得头部信息
+//			music.setTime(new Integer(header.getTrackLength()));
+//		
+//			byte[] buf=new byte[128];
+//			 RandomAccessFile raf = new RandomAccessFile(mp3path, "r");
+//			 raf.seek(raf.length()-128);
+//			
+//			 raf.read(buf);
+//			 raf.close();
+//			 if(buf.length!=128) {
+//				 music.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
+//				  music.setAlbum("未知");
+//				  music.setSinger("未知");
+//				  music.setDate("未知");
+//				// System.out.println("数据长度不合法！");
+//			 }
+//			 else if(!"TAG".equalsIgnoreCase(new String(buf,0,3))){//标签头是否存在
+//				// System.out.println("MP3标签信息数据格式不正确！");
+//				 music.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
+//				
+//				  music.setAlbum("未知");
+//				  music.setSinger("未知");
+//				  music.setDate("未知");
+//			    }	
+//			 else 
+//			 {
+//				 String SongName = new String(buf,3,30,chastset).trim();//歌曲名称
+//				 if(isNull(SongName)) {
+//					 SongName=file.getName().substring(0, file.getName().lastIndexOf("."));
+//				 }
+//				// System.out.println(SongName);
+//				 String Artist = new String(buf,33,30,chastset).trim();//歌手名字
+//				 if(isNull(Artist)) {
+//					 Artist="未知";
+//				 }
+//				 //System.out.println(Artist);
+//				  String Album = new String(buf,63,30,chastset).trim();//专辑名称
+//				  if(isNull(Album)) {
+//					  Album="未知";
+//					 }
+//				 // System.out.println(Album);
+//				  String Year = new String(buf,93,4,chastset).trim();//出品年份
+//				  if(isNull(Year)) {
+//					  Year="未知";
+//					 }
+//				 // System.out.println(Year);
+//				  music.setName(SongName);
+//				  music.setAlbum(Album);
+//				  music.setSinger(Artist);
+//				  music.setDate(Year);
+//				
+//			 }
+//	   }catch(Exception e) {
+//		   e.printStackTrace();
+//	   }
+//	   music.setGenre("未知");
+//	   music.setLanguage("未知");
+//	   music.setRegion("未知");
+//	   music.setTheme("未知");
+//	   music.setCreateTime(new Date());
+//	   music.setUpdateTime(new Date());
+//	   return music;
+//   }
    public static boolean isNull(String str) {
 	   boolean b=false;
 	   if(str==null) {
@@ -461,7 +487,7 @@ public class BeanUtil {
 		   extAjaxResponse.setMsg("邮箱为空！");
 			extAjaxResponse.setSuccess(false);
 	   }else {
-			boolean b=Rules.phonerule(email.trim());
+			boolean b=Rules.emailrule(email.trim());
 			if(!b) {
 				extAjaxResponse.setMsg("邮箱不正确！");
 				extAjaxResponse.setSuccess(false);
@@ -514,7 +540,7 @@ public class BeanUtil {
 			// 通过session得到transport对象
 			Transport ts = session.getTransport();
 			// 连接邮件服务器：邮箱类型，帐号，授权码代替密码（更安全）
-			ts.connect("smtp.qq.com","656704118", "raaavbnflgvabajg");//后面的字符是授权码，用qq密码反正我是失败了（用自己的，别用我的，这个号是我瞎编的，为了。。。。）
+			ts.connect("smtp.qq.com","656704118", "hewlhmziqzfwbedb");//后面的字符是授权码，用qq密码反正我是失败了（用自己的，别用我的，这个号是我瞎编的，为了。。。。）
 			// 创建邮件
 			
 			Message message = createSimpleMail(session, email, content);
@@ -591,4 +617,139 @@ public class BeanUtil {
 	   }
 	   return extAjaxResponse;
    }
+//   public static SearchMusicDTO musicTomusicDRTO(Music music,SearchMusicDTO musicdto) {
+//		musicdto.setId(music.getTrueid());
+//		musicdto.setCreateTime(music.getCreateTime());
+//		musicdto.setUpdateTime(music.getUpdateTime());;
+//		musicdto.setName(music.getName());
+//		musicdto.setPath(music.getPath());;
+//		musicdto.setSinger(music.getSinger());
+//		musicdto.setAlbum(music.getAlbum());
+//		musicdto.setLanguage(music.getLanguage());
+//		musicdto.setGenre(music.getGenre());		
+//		musicdto.setRegion(music.getRegion());
+//		musicdto.setTheme(music.getTheme());
+//		musicdto.setDate(music.getDate());
+//		return musicdto;
+//		
+//	}
+   /**
+	 * 将汉字转换为全拼
+	 * 
+	 * @param src
+	 * @return String
+	 */
+	public static String getPinYin(String src) {
+		char[] t1 = null;
+		t1 = src.toCharArray();
+		// System.out.println(t1.length);
+		String[] t2 = new String[t1.length];
+		// System.out.println(t2.length);
+		// 设置汉字拼音输出的格式
+		HanyuPinyinOutputFormat t3 = new HanyuPinyinOutputFormat();
+		t3.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+		t3.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+		t3.setVCharType(HanyuPinyinVCharType.WITH_V);
+		String t4 = "";
+		int t0 = t1.length;
+		try {
+			for (int i = 0; i < t0; i++) {
+				// 判断是否为汉字字符
+				// System.out.println(t1[i]);
+				if (Character.toString(t1[i]).matches("[\\u4E00-\\u9FA5]+")) {
+					t2 = PinyinHelper.toHanyuPinyinStringArray(t1[i], t3);// 将汉字的几种全拼都存到t2数组中
+					t4 += t2[0];// 取出该汉字全拼的第一种读音并连接到字符串t4后
+				} else {
+					// 如果不是汉字字符，直接取出字符并连接到字符串t4后
+					t4 += Character.toString(t1[i]);
+				}
+			}
+		} catch (BadHanyuPinyinOutputFormatCombination e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return t4;
+	}
+	/**
+	 * 提取首个字符的首字母，其他返回*
+	 * 
+	 * @param str
+	 * @return String
+	 */
+	public static String getFirstPinYinHeadChar(String str) {
+ 
+		StringBuffer pybf = new StringBuffer();
+		char word = str.charAt(0);
+		// 提取汉字的首字母
+		String[] pinyinArray;
+		// 是否是因为字母
+		if (word > 128) {
+			pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
+			// 如果不是汉字，就返回*
+			if (pinyinArray != null) {
+				pybf.append(pinyinArray[0].charAt(0));
+			} else {
+				pybf.append("*");
+			}
+		} else {
+ 
+			// 是字母直接返回，不是返回*
+			if (Character.isLetter(word)) {
+				pybf.append(word);
+			} else {
+				pybf.append("*");
+			}
+		}
+ 
+		// 全部返回大写
+		return pybf.toString().toUpperCase();
+	}
+
+	public static List<SearchMusicDTO> sortCard(List<SearchMusicDTO> list){
+		// card的等级越高，cardType越大，所以可以根据cardType来排序
+		Collections.sort(list, new Comparator<SearchMusicDTO>() {
+		    public int compare(SearchMusicDTO card1, SearchMusicDTO card2) {
+		    // 根据CentralCard的CardType来排序
+			return card1.getAmount_play().compareTo(card2.getAmount_play());
+		   }
+		});
+		//倒序
+		Collections.reverse(list);
+		
+		return list;
+	}
+	
+	/*敏感词检测*/
+	public static ExtAjaxResponse badword(String string) {
+		ExtAjaxResponse ExtAjaxResponse=new ExtAjaxResponse();
+		Set<String> s = BadWordUtil2.words;
+		Map<String,String> map = BadWordUtil2.wordMap;
+		
+		
+		Set<String> set = BadWordUtil2.getBadWord(string, 2);
+		Boolean i = BadWordUtil2.isContaintBadWord(string, 2);
+		Boolean i2 = BadWordUtil2.isContaintBadWord("粉饰太平", 2);
+		Boolean i22 = BadWordUtil2.isContaintBadWord("粉饰太平", 1);
+		Boolean i3 = BadWordUtil2.isContaintBadWord("粉饰", 2);
+		Boolean i33 = BadWordUtil2.isContaintBadWord("粉饰", 1);
+		Boolean i4 = BadWordUtil2.isContaintBadWord("太平", 2);
+		Boolean i44 = BadWordUtil2.isContaintBadWord("太平", 1);
+		Boolean i5 = BadWordUtil2.isContaintBadWord("个人崇拜", 2);
+		Boolean i55 = BadWordUtil2.isContaintBadWord("个人崇拜", 1);
+		Boolean i6 = BadWordUtil2.isContaintBadWord("个人", 2);
+		Boolean i66 = BadWordUtil2.isContaintBadWord("个人", 1);
+		Boolean i7 = BadWordUtil2.isContaintBadWord("崇拜", 2);
+		Boolean i77 = BadWordUtil2.isContaintBadWord("崇拜", 1);
+		if(set.size()==0) {
+			ExtAjaxResponse.setSuccess(true);
+		}
+		else {
+			ExtAjaxResponse.setMsg(""+set);
+			ExtAjaxResponse.setSuccess(false);
+		}
+		//System.out.println("语句中包含敏感词的个数为：" + set.size() + "。包含：" + set);
+		return ExtAjaxResponse;
+		
+	}
+
 }

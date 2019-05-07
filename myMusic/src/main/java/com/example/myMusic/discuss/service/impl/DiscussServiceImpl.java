@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.myMusic.common.dto.discuss.DiscussDTO;
-import com.example.myMusic.common.dto.discuss.DiscussPageDTO;
+
 import com.example.myMusic.common.dto.discuss.DiscussRequestDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
 import com.example.myMusic.common.dto.mix_discuss_reply.IdDTO;
@@ -75,7 +75,7 @@ public class DiscussServiceImpl implements DiscussService{
 		Music music=musicDao.findById(discussRequestDTO.getMusic_id()).get();
 		if(user!=null) {
 			discuss.setUser(user);
-			user.getDiscussList().add(discuss);
+			user.getDiscusslist().add(discuss);
 			
 			userDao.save(user);
 		}
@@ -85,7 +85,7 @@ public class DiscussServiceImpl implements DiscussService{
 			musicDao.save(music);
 		}
 		discuss.setContent(discussRequestDTO.getContent());
-		discuss.setLikernumber(new Integer(0));
+		//discuss.setLikernumber(new Integer(0));
 		discussDao.save(discuss);		
 		extAjaxResponse.setMsg("评论成功");
 		extAjaxResponse.setSuccess(true);
@@ -106,7 +106,7 @@ public class DiscussServiceImpl implements DiscussService{
 			
 			if(discuss.getUser()!=null) {
 				User user=discuss.getUser();
-				user.getDiscussList().remove(discuss);
+				user.getDiscusslist().remove(discuss);
 				userDao.save(user);
 			}
 			discuss.setUser(null);
@@ -116,19 +116,7 @@ public class DiscussServiceImpl implements DiscussService{
 				musicDao.save(music);
 			}
 			discuss.setMusic(null);
-			if(discuss.getReplylist().size()!=0) {
-				List<Reply> replylist=discuss.getReplylist();
-				for(Reply reply:replylist) {
-					if(reply.getUser()!=null) {
-						User user=reply.getUser();
-						user.getReplyList().remove(reply);
-						userDao.save(user);
-						
-					}
-					reply.setUser(null);
-					replyDao.save(reply);
-				}
-			}
+	
 			discussDao.save(discuss);
 			discussDao.deleteById(id);
 			extAjaxResponse.setMsg("删除评论成功！");
@@ -148,12 +136,12 @@ public class DiscussServiceImpl implements DiscussService{
 		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
 		if(discussDao.existsById(id)) {
 			Discuss discuss=discussDao.findById(id).get();
-			Integer likenember=discuss.getLikernumber();
-			if(likenember==null) 
-				likenember=new Integer(0);
-			int i=likenember.intValue()+1;
-			likenember=new Integer(i);
-			discuss.setLikernumber(likenember);
+			//Integer likenember=discuss.getLikernumber();
+//			if(likenember==null) 
+//				likenember=new Integer(0);
+//			int i=likenember.intValue()+1;
+//			likenember=new Integer(i);
+			//discuss.setLikernumber(likenember);
 			discussDao.save(discuss);
 			extAjaxResponse.setSuccess(true);
 			extAjaxResponse.setMsg("点赞成功！");
@@ -169,12 +157,12 @@ public class DiscussServiceImpl implements DiscussService{
 		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
 		if(discussDao.existsById(id)) {
 			Discuss discuss=discussDao.findById(id).get();
-			Integer likenember=discuss.getLikernumber();
-			if(likenember==null) 
-				likenember=new Integer(0);
-			int i=likenember.intValue()-1;
-			likenember=new Integer(i);
-			discuss.setLikernumber(likenember);
+		//	Integer likenember=discuss.getLikernumber();
+//			if(likenember==null) 
+//				likenember=new Integer(0);
+//			int i=likenember.intValue()-1;
+//			likenember=new Integer(i);
+		//	discuss.setLikernumber(likenember);
 			discussDao.save(discuss);
 			extAjaxResponse.setSuccess(true);
 			extAjaxResponse.setMsg("取消点赞成功！");
@@ -208,58 +196,54 @@ public class DiscussServiceImpl implements DiscussService{
         else
         	discussResponseDTO.setSuccess(true);
 		discussResponseDTO.setDiscussdtolist(discussdtolist);
-		discussResponseDTO.setNownumber(discussList.getContent().size());
-		discussResponseDTO.setNowpage(discussList.getNumber()+1);
-		//discussResponseDTO.setSuccess(false);
-		discussResponseDTO.setTotalnumber(((int)discussList.getTotalElements())+1);
-		discussResponseDTO.setTotalpage(discussList.getTotalPages());
+		
 		return discussResponseDTO;
 	}
     
-	@Override
-	public DiscussResponseDTO getDiscusspage(DiscussPageDTO discussPageDTO) {
-		// TODO Auto-generated method stub
-		DiscussResponseDTO discussResponseDTO=new DiscussResponseDTO();
-		if(discussPageDTO.getMusic_id().equals(0L)) {
-			discussResponseDTO.setSuccess(false);
-			discussResponseDTO.setMsg("传入的音乐id为空");
-			return discussResponseDTO;
-		}
-		
-		if(musicDao.existsById(discussPageDTO.getMusic_id())) {
-		    Music music=musicDao.findById(discussPageDTO.getMusic_id()).get();
-		    List<Discuss> discusslist=music.getDiscusslist();
-		    if(discusslist.size()==0) {
-	        	discussResponseDTO.setSuccess(false);
-	        	discussResponseDTO.setMsg("没有数据！");
-				return discussResponseDTO;
-			}
-		    //获取分页后的数据
-		    List<Discuss> pagelist=BeanUtil.fenye(discusslist,discussPageDTO.getPage());
-		    List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
-			for(Discuss discuss:pagelist) {
-				DiscussDTO discussDTO=new DiscussDTO();
-				BeanUtil.discussTodiscussDTO(discuss, discussDTO);
-				discussdtolist.add(discussDTO);
-			}
-			
-	      
-	        discussResponseDTO.setSuccess(true);
-			discussResponseDTO.setDiscussdtolist(discussdtolist);;
-			discussResponseDTO.setNownumber(pagelist.size());
-			discussResponseDTO.setNowpage(BeanUtil.nowpage(discusslist,discussPageDTO.getPage()));
-			discussResponseDTO.setTotalnumber(discusslist.size());
-			discussResponseDTO.setTotalpage(BeanUtil.pageTotal(discusslist));
-				
-			if(discussResponseDTO.getNowpage()==discussResponseDTO.getTotalpage())
-				discussResponseDTO.setMsg("已经到底了！");
-			return discussResponseDTO;
-		    
-		}
-		discussResponseDTO.setSuccess(false);
-		discussResponseDTO.setMsg("此音乐不存在");
-		return discussResponseDTO;
-	}
+//	@Override
+//	public DiscussResponseDTO getDiscusspage(DiscussPageDTO discussPageDTO) {
+//		// TODO Auto-generated method stub
+//		DiscussResponseDTO discussResponseDTO=new DiscussResponseDTO();
+//		if(discussPageDTO.getMusic_id().equals(0L)) {
+//			discussResponseDTO.setSuccess(false);
+//			discussResponseDTO.setMsg("传入的音乐id为空");
+//			return discussResponseDTO;
+//		}
+//		
+//		if(musicDao.existsById(discussPageDTO.getMusic_id())) {
+//		    Music music=musicDao.findById(discussPageDTO.getMusic_id()).get();
+//		    List<Discuss> discusslist=music.getDiscusslist();
+//		    if(discusslist.size()==0) {
+//	        	discussResponseDTO.setSuccess(false);
+//	        	discussResponseDTO.setMsg("没有数据！");
+//				return discussResponseDTO;
+//			}
+//		    //获取分页后的数据
+//		    List<Discuss> pagelist=BeanUtil.fenye(discusslist,discussPageDTO.getPage());
+//		    List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
+//			for(Discuss discuss:pagelist) {
+//				DiscussDTO discussDTO=new DiscussDTO();
+//				BeanUtil.discussTodiscussDTO(discuss, discussDTO);
+//				discussdtolist.add(discussDTO);
+//			}
+//			
+//	      
+//	        discussResponseDTO.setSuccess(true);
+//			discussResponseDTO.setDiscussdtolist(discussdtolist);;
+//			discussResponseDTO.setNownumber(pagelist.size());
+//			discussResponseDTO.setNowpage(BeanUtil.nowpage(discusslist,discussPageDTO.getPage()));
+//			discussResponseDTO.setTotalnumber(discusslist.size());
+//			discussResponseDTO.setTotalpage(BeanUtil.pageTotal(discusslist));
+//				
+//			if(discussResponseDTO.getNowpage()==discussResponseDTO.getTotalpage())
+//				discussResponseDTO.setMsg("已经到底了！");
+//			return discussResponseDTO;
+//		    
+//		}
+//		discussResponseDTO.setSuccess(false);
+//		discussResponseDTO.setMsg("此音乐不存在");
+//		return discussResponseDTO;
+//	}
 
 	@Override
 	public MixrspDTO mixdiscuss(Long songid,int page) {
@@ -291,25 +275,8 @@ public class DiscussServiceImpl implements DiscussService{
 						}
 						
 						idlist.add(iddis);
-						List<Reply> replylist=discuss.getReplylist();
-						//评论内有回复就进行操作
-						if(replylist.size()!=0&&replylist!=null) {						
-							for(Reply reply:replylist) {
-								IdDTO idreply=new IdDTO();
-								Date d=reply.getCreateTime();
-								if(d!=null) {
-									idreply.setDate(d);
-								}else {
-									mixrspDTO.setSuccess(false);
-									mixrspDTO.setMsg("存在回复"+reply.getId()+"无对应创建时间！");
-									return mixrspDTO;
-								}
-								
-								idreply.setId(reply.getId());
-								idreply.setIsreply(true);
-								idlist.add(idreply);
-							}
-						}
+						
+					
 					}
 					List<IdDTO> iddto=BeanUtil.sortlist(idlist);
 //					Collections.sort(iddto, new Comparator<IdDTO>() {//降序排序，按里面的Date排
@@ -343,35 +310,7 @@ public class DiscussServiceImpl implements DiscussService{
 							   mixDTO.setSendtime(reply.getCreateTime());
 							   mixDTO.setIsreply(true);
 							   mixDTO.setLikernumber(reply.getLikernumber());
-							   User user_in_reply=reply.getUser();
-							   if(user_in_reply==null) {
-								   mixrspDTO.setSuccess(false);
-									mixrspDTO.setMsg("存在id为"+i.getId()+"的回复数据无对应用户");
-									return mixrspDTO;
-							   }else {
-								   mixDTO.setUserId(user_in_reply.getId());
-								   mixDTO.setUsername(user_in_reply.getName());
-							   }
-							   Discuss discuss_in_reply=reply.getDiscuss();
-							   if(discuss_in_reply==null) {
-								   mixrspDTO.setSuccess(false);
-									mixrspDTO.setMsg("存在id为"+i.getId()+"的回复数据无对应评论");
-									return mixrspDTO;
-							   }else {
-								   IsreplyDTO isreplyDTO=new IsreplyDTO();
-								   isreplyDTO.setContent(discuss_in_reply.getContent());
-								   User user_in_reply_discuss=discuss_in_reply.getUser();
-								   if(user_in_reply_discuss==null) {
-									   mixrspDTO.setSuccess(false);
-										mixrspDTO.setMsg("存在id为"+i.getId()+"的回复数据对应的id为"+discuss_in_reply.getId()+"评论数据无对应用户");
-										return mixrspDTO;
-								   }else {
-								      isreplyDTO.setUserId(user_in_reply_discuss.getId());
-								      isreplyDTO.setUsername(user_in_reply_discuss.getName());
-								   }
-								   mixDTO.setIsreplyDTO(isreplyDTO);
-								   mixdto.add(mixDTO);
-							   }
+						
 							}else {
 								    mixrspDTO.setSuccess(false);
 									mixrspDTO.setMsg("不存在id为"+i.getId()+"的回复数据");
@@ -381,7 +320,7 @@ public class DiscussServiceImpl implements DiscussService{
 							if(discussDao.existsById(i.getId())) {
 								Discuss discuss=discussDao.findById(i.getId()).get();
 								mixDTO.setContent(discuss.getContent());
-								mixDTO.setLikernumber(discuss.getLikernumber());
+							//	mixDTO.setLikernumber(discuss.getLikernumber());
 								mixDTO.setSendtime(discuss.getCreateTime());
 								User user_in_discuss=discuss.getUser();
 								if(user_in_discuss==null) {

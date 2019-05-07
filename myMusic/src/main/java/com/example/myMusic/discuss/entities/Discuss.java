@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.example.myMusic.common.util.BaseEntity;
@@ -19,12 +20,27 @@ import com.example.myMusic.user.entities.User;
 public class Discuss extends BaseEntity{
        
        private String content;//评论的内容
-	   private Integer likernumber=null;//点赞人数
+	 
 	   private User user;  //该评论的用户     
        private Music music;//该评论属于哪首歌
-	   private List<Reply> replylist= new ArrayList<Reply>();//该评论的回复
-	   
-	 @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+       private Discuss discuss;//如果存在，则此为回复  单方向，可直接置空
+       private List<User> userlist=new ArrayList<User>();//点赞人 单方向，可直接置空
+	
+     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)  
+	 public Discuss getDiscuss() {
+		return discuss;
+	}
+	public void setDiscuss(Discuss discuss) {
+		this.discuss = discuss;
+	}
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	public List<User> getUserlist() {
+		return userlist;
+	}
+	public void setUserlist(List<User> userlist) {
+		this.userlist = userlist;
+	}
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     public Music getMusic() {
 	    return music;
     }
@@ -38,13 +54,13 @@ public class Discuss extends BaseEntity{
 	public void setUser(User user) {
 		this.user = user;
 	}
-	@OneToMany(mappedBy="discuss")
-	public List<Reply> getReplylist() {
-		return replylist;
-	}
-	public void setReplylist(List<Reply> replylist) {
-		this.replylist = replylist;
-	}
+//	@OneToMany(mappedBy="discuss")
+//	public List<Reply> getReplylist() {
+//		return replylist;
+//	}
+//	public void setReplylist(List<Reply> replylist) {
+//		this.replylist = replylist;
+//	}
 
 	
 	public String getContent() {
@@ -54,12 +70,7 @@ public class Discuss extends BaseEntity{
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public Integer getLikernumber() {
-		return likernumber;
-	}
-	public void setLikernumber(Integer likernumber) {
-		this.likernumber = likernumber;
-	}
+
 	   
 	
 }
