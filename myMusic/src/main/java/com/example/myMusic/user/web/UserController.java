@@ -102,7 +102,9 @@ public class UserController {
 	 //用户创建新歌单
 	 @PostMapping(value="/createSongList",consumes=MediaType.APPLICATION_JSON_VALUE)
 	 public ExtAjaxResponse createSongList(@RequestBody UserSongListDTO userSongListDTO) {
-	
+//		 ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+//		 extAjaxResponse.setMsg(userSongListDTO.get);
+//		 extAjaxResponse.setSuccess(false);
 		 return userService.createSongList(userSongListDTO);
 	 }
 	 
@@ -152,42 +154,40 @@ public class UserController {
 	
 		 //把歌曲添加到自己的创建歌单
 		 @PostMapping(value="/addsongtomy",consumes=MediaType.APPLICATION_JSON_VALUE)
-		 public ExtAjaxResponse addsongtomy(@RequestBody AddsongDTO AddsongDTO) {
-//			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
-//			 extAjaxResponse.setMsg("");
-//			 extAjaxResponse.set
-			 return userService.addsongtomy(AddsongDTO);
+		 public ExtAjaxResponse addsongtomy(@RequestBody AddsongDTO addsongDTO) {
+			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
+			 extAjaxResponse.setMsg(""+addsongDTO.getSonglistid());
+			 extAjaxResponse.setSuccess(false);
+			 return userService.addsongtomy(addsongDTO);
 		 }
-		 //获取此歌曲评论
+		 //获取此歌曲评论   ;歌曲id
 		 @PostMapping(value="/getdiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
-		 public DiscussResponseDTO getdiscuss(@RequestBody AddsongDTO AddsongDTO) {
-//			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
-//			 extAjaxResponse.setMsg("");
-//			 extAjaxResponse.set
-			 return userService.getdiscuss(AddsongDTO);
+		 public DiscussResponseDTO getdiscuss(@RequestBody AddsongDTO addsongDTO) {
+
+			 return userService.getdiscuss(addsongDTO);
 		 }
-		 //点赞评论  ;点赞用户的id，评论的id
-		 @PostMapping(value="/getlike",consumes=MediaType.APPLICATION_JSON_VALUE)
-		 public ExtAjaxResponse getlike(@RequestBody AddsongDTO AddsongDTO) {
-//			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
-//			 extAjaxResponse.setMsg("");
-//			 extAjaxResponse.set
-			 return userService.getlike(AddsongDTO);
-		 }
-		 //取消点赞的用户的id，评论的id
+		 //取消点赞评论  ;取消点赞用户的id，评论的id
 		 @PostMapping(value="/deletelike",consumes=MediaType.APPLICATION_JSON_VALUE)
-		 public ExtAjaxResponse deletelike(@RequestBody AddsongDTO AddsongDTO) {
+		 public ExtAjaxResponse getlike(@RequestBody AddsongDTO addsongDTO) {
 //			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
 //			 extAjaxResponse.setMsg("");
 //			 extAjaxResponse.set
-			 return userService.deletelike(AddsongDTO);
+			 return userService.getlike(addsongDTO);
+		 }
+		 //点赞的用户的id，评论的id
+		 @PostMapping(value="/getlike",consumes=MediaType.APPLICATION_JSON_VALUE)
+		 public ExtAjaxResponse deletelike(@RequestBody AddsongDTO addsongDTO) {
+//			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
+//			 extAjaxResponse.setMsg("");
+//			 extAjaxResponse.setSuccess(false);
+			 return userService.deletelike(addsongDTO);
 		 }
 		 //发表评论
 		 @PostMapping(value="/adddiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
 		 public ExtAjaxResponse adddiscuss(@RequestBody AdddiscussDTO adddiscussDTO) {
 //			 ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
-//			 extAjaxResponse.setMsg("");
-//			 extAjaxResponse.set
+//			 extAjaxResponse.setMsg(adddiscussDTO.isLogin());
+//			 extAjaxResponse.setSuccess(false);
 			 return userService.adddiscuss(adddiscussDTO);
 		 }
 		 //查看用户自己的评论 用户id
@@ -211,6 +211,24 @@ public class UserController {
 			 return userService.replyother(adddiscussDTO);
 		 }
 		 
+		 //给手机端使用的登录
+		 @PostMapping(value="/phonelogin",consumes=MediaType.APPLICATION_JSON_VALUE)
+		 public LoginRspDTO phonelogin(@RequestBody UserloginDTO userloginDTO) {
+
+			 return userService.phonelogin(userloginDTO);
+		 }
+		 //将歌曲删除出自己的歌单
+		 @PostMapping(value="/deletemysong",consumes=MediaType.APPLICATION_JSON_VALUE)
+		 public ExtAjaxResponse deletemysong(@RequestBody AddsongDTO addsongDTO) {
+        
+			 return userService.deletemysong(addsongDTO);
+		 }
 		 
+		 //将查看此歌曲是否在“我喜欢”的歌单里  用户id 歌曲真实id
+		 @PostMapping(value="/checkinmylike",consumes=MediaType.APPLICATION_JSON_VALUE)
+		 public ExtAjaxResponse checkinmylike(@RequestBody AddsongDTO addsongDTO) {
+        
+			 return userService.checkinmylike(addsongDTO);
+		 }
 		 
 }

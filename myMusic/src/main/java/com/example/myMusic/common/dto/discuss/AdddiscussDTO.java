@@ -6,7 +6,14 @@ public class AdddiscussDTO {
      private Long songid;
      private String content;
      private boolean isLogin=false;
+     private boolean islogin=false;
      
+	public boolean isIslogin() {
+		return islogin;
+	}
+	public void setIslogin(boolean islogin) {
+		this.islogin = islogin;
+	}
 	public Long getDiscussid() {
 		return discussid;
 	}

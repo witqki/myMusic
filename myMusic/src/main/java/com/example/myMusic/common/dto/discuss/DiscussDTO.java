@@ -11,8 +11,18 @@ public class DiscussDTO {
 	 private ReplyDTO replydto;
 	 private String musicname;//查看评论时用
 	 private Long discussid;
+	 private Long time;//评论的时间
 	 
+	public Long getTime() {
+		return time;
+	}
+
+	public void setTime(Long time) {
+		this.time = time;
+	}
+
 	public Long getDiscussid() {
+	
 		return discussid;
 	}
 

@@ -61,7 +61,8 @@ public class UserServiceImpl implements UserService{
     private DiscussDao discussDao;
     @Autowired
     private CodeDao codeDao;
-    
+    @Autowired
+	private UserService userService=null;
     @Autowired
     private SongListDao songListDao;
     
@@ -288,7 +289,7 @@ public class UserServiceImpl implements UserService{
 			return extAjaxResponse;
 		}
 		
-		else if(userregisteredDTO.getPassword().trim()==null||userregisteredDTO.getPassword().trim().equals(""))
+		else if(userregisteredDTO.getPassword()==null||userregisteredDTO.getPassword().trim().equals(""))
 		{
 			extAjaxResponse.setMsg("密码为空！");
 			extAjaxResponse.setSuccess(false);
@@ -371,20 +372,25 @@ public class UserServiceImpl implements UserService{
 		//进行清除过期验证码
 		List<Code> list=(List<Code>) codeDao.findAll();
 		long nowtime=new Date().getTime();
-		for(Code savecode:list) {
-			long time=nowtime-savecode.getBuildtime();
-			if(time<=BeanUtil.getLimittime()) {
-				
-			}else {
-				codeDao.delete(savecode);
-			}
+		if(list==null||list.size()==0) {
 			
+		}else {
+			for(Code savecode:list) {
+				long time=nowtime-savecode.getBuildtime();
+				if(time<=BeanUtil.getLimittime()) {
+					
+				}else {
+					codeDao.delete(savecode);
+				}
+				
+			}
 		}
 		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
-		ExtAjaxResponse pswcheck=BeanUtil.checkpsw(userresetDTO.getPsw(), userresetDTO.getConpsw());
+		ExtAjaxResponse pswcheck=BeanUtil.checkpsw(userresetDTO.getPsw(), userresetDTO.getConpsw());	
+		
 		if(userresetDTO.getId()!=null) {
 			if(BeanUtil.isNull(userresetDTO.getCode())) {
-				extAjaxResponse.setMsg("验证码为空");
+				extAjaxResponse.setMsg("输入的验证码为空");
 				extAjaxResponse.setSuccess(false);
 			}else if(!pswcheck.isSuccess()) {
 				extAjaxResponse.setMsg(pswcheck.getMsg());
@@ -426,15 +432,16 @@ public class UserServiceImpl implements UserService{
 							 extAjaxResponse.setMsg("验证码不存在或已过期！");
 								extAjaxResponse.setSuccess(false);
 						 }else {//找到
-							 List<User> maillist=userDao.findByUserphone(userresetDTO.getSender().trim());
+							 List<User> maillist=userDao.findByUseremail(userresetDTO.getSender().trim());
 						     if(maillist.size()!=0&&maillist!=null) {
 						    	 User user=maillist.get(0);
 						    	 user.setPassword(userresetDTO.getPsw().trim());
 						    	 userDao.save(user);
 						    	    extAjaxResponse.setMsg("success");
 									extAjaxResponse.setSuccess(true);
-						     }else {
-						    	   extAjaxResponse.setMsg("该邮箱没有注册");
+						     }
+						     else {
+						    	   extAjaxResponse.setMsg("该邮箱没有存在！");
 									extAjaxResponse.setSuccess(false);
 						     }
 						 }
@@ -447,7 +454,8 @@ public class UserServiceImpl implements UserService{
 					extAjaxResponse.setSuccess(false);
 				}
 			}
-		}else {
+		}
+		else {
 			extAjaxResponse.setMsg("传输的id有为空");
 			extAjaxResponse.setSuccess(false);
 		}
@@ -494,13 +502,19 @@ public class UserServiceImpl implements UserService{
 						extAjaxResponse.setSuccess(false);
 					}
 					
-				}else if(checkDTO.getId().equals(new Integer(1))) {//邮箱
+				}
+				else if(checkDTO.getId().equals(new Integer(1))) {//邮箱
 					ExtAjaxResponse checkemail=BeanUtil.checkemail(checkDTO.getSender().trim());
 					if(checkemail.isSuccess()) {
 						//发送验证码
 						String code=BeanUtil.getCode();
 						ExtAjaxResponse sendmail=BeanUtil.sendEmail(checkDTO.getSender().trim(), code);
 						if(sendmail.isSuccess()) {
+							Code c=new Code();
+							c.setBuildtime((new Date()).getTime());
+							c.setCode(code);
+							c.setEmail(checkDTO.getSender().trim());
+							codeDao.save(c);
 							extAjaxResponse.setMsg("success");
 							extAjaxResponse.setSuccess(true);
 						}else {
@@ -557,11 +571,14 @@ public class UserServiceImpl implements UserService{
 					}
 					else {
 						for(SongList SongList:songlist) {
-							if(SongList.getName().equals(userSongListDTO.getName().trim())) {
-								extAjaxResponse.setMsg("歌单名已存在！");
-								extAjaxResponse.setSuccess(false);
-								return extAjaxResponse;
+							if(!SongList.isIsopen()) {
+								if(SongList.getName().equals(userSongListDTO.getName().trim())) {
+									extAjaxResponse.setMsg("歌单名已存在！");
+									extAjaxResponse.setSuccess(false);
+									return extAjaxResponse;
+								}
 							}
+						
 						}
 					}
 					
@@ -676,10 +693,12 @@ public class UserServiceImpl implements UserService{
 						List<SongList> list=user.getSonglist();
 						if(list.size()!=0&&list!=null) {
 							for(SongList songlist:list ) {
-								if(songlist.getName().equals(userSongListDTO.getName().trim())) {
-									extAjaxResponse.setMsg("歌单名已存在！");
-									extAjaxResponse.setSuccess(false);
-									return extAjaxResponse;
+								if(!songlist.isIsopen()) {
+									if(songlist.getName().equals(userSongListDTO.getName().trim())) {
+										extAjaxResponse.setMsg("歌单名已存在！");
+										extAjaxResponse.setSuccess(false);
+										return extAjaxResponse;
+									}
 								}
 							}
 							songList.setName(userSongListDTO.getName().trim());
@@ -1272,33 +1291,34 @@ public class UserServiceImpl implements UserService{
 						if(songListDao.existsById(addsongDTO.getSonglistid())) {
 							SongList songList=songListDao.findById(addsongDTO.getSonglistid()).get();
 							List<Music> musicDTO=songList.getMusiclist();
-							if(musicDTO.size()==0||musicDTO==null) {
+							if((musicDTO.size()==0)||(musicDTO==null)) {
 								List<Music> ss=new ArrayList<Music>();
 								ss.add(mu);
 								songList.setMusiclist(ss);
-							}else {//歌单存在歌曲
-								for(Music Music:musicDTO) {
-									if(Music.getTrueid().equals(mu.getTrueid())) {//判断是否含有此歌曲
-										extAjaxResponse.setMsg("已存在您的歌单里！");
-										extAjaxResponse.setSuccess(false);
-										return extAjaxResponse;
-									}
-								}
-								//此歌单不含有此歌曲
-								songList.getMusiclist().add(mu);
 							}
-							//判断歌曲是否含有歌单
-							List<SongList> hh=mu.getSonglist();
-							if(hh.size()==0||hh==null) {//为空
-								List<SongList> ff=new ArrayList<SongList>();
-								ff.add(songList);
-								mu.setSonglist(ff);
-							}else {//此歌曲存在歌单
-								mu.getSonglist().add(songList);
-							}
-
-							musicDao.save(mu);
-							songListDao.save(songList);
+							//else {//歌单存在歌曲
+//								for(Music Music:musicDTO) {
+//									if(Music.getTrueid().equals(mu.getTrueid())) {//判断是否含有此歌曲
+//										extAjaxResponse.setMsg("已存在您的歌单里！");
+//										extAjaxResponse.setSuccess(false);
+//										return extAjaxResponse;
+//									}
+//								}
+//								//此歌单不含有此歌曲
+//								songList.getMusiclist().add(mu);
+//							}
+//							//判断歌曲是否含有歌单
+//							List<SongList> hh=mu.getSonglist();
+//							if(hh.size()==0||hh==null) {//为空
+//								List<SongList> ff=new ArrayList<SongList>();
+//								ff.add(songList);
+//								mu.setSonglist(ff);
+//							}else {//此歌曲存在歌单
+//								mu.getSonglist().add(songList);
+//							}
+//
+//							musicDao.save(mu);
+//							songListDao.save(songList);
 							extAjaxResponse.setMsg("添加成功！");
 							extAjaxResponse.setSuccess(true);
 							return extAjaxResponse;
@@ -1416,10 +1436,12 @@ public class UserServiceImpl implements UserService{
 					
 				}
 			}else {//用户登录
-				if(addsongDTO.getSongid().equals(0L)||addsongDTO.getUserid().equals(0L)) {
+				if(addsongDTO.getSongid().equals(0L)||addsongDTO.getUserid().equals(0L)) 
+				{
 					discussResponseDTO.setMsg("系统错误！传输的id为空");
 					discussResponseDTO.setSuccess(false);
-				}else {
+				}
+				else {
 					if(userDao.existsById(addsongDTO.getUserid())) {//判断用户是否存在
 						//用户存在
 						//先判断数据库有无此歌曲信息，无就添加				
@@ -1439,6 +1461,7 @@ public class UserServiceImpl implements UserService{
 						}else {//数据库不为空，则查找trueid是否存在
 							boolean b=false;//判断是否存在，false为不存在
 							for(Music m:musiclist) {
+								if(m.getTrueid()!=null)
 								if(m.getTrueid().equals(addsongDTO.getSongid())) {
 									b=true;
 									break;
@@ -1464,6 +1487,7 @@ public class UserServiceImpl implements UserService{
 						List<Music> kk=(List<Music>) musicDao.findAll();
 						Music dto=new Music();
 						for(Music jj:kk) {//一般此歌已经在库内，所以不判断
+							if(jj.getTrueid()!=null)
 							if(jj.getTrueid().equals(addsongDTO.getSongid())) {
 								dto=jj;
 								break;
@@ -1476,7 +1500,8 @@ public class UserServiceImpl implements UserService{
 							discussResponseDTO.setMsg("暂无数据！");
 							discussResponseDTO.setSuccess(true);
 							discussResponseDTO.setDiscussdtolist(null);
-						}else {//此歌曲含有评论信息，进行获取
+						}
+						else {//此歌曲含有评论信息，进行获取
 							List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
 							
 							for(Discuss ss:discuss) {
@@ -1552,19 +1577,21 @@ public class UserServiceImpl implements UserService{
 					List<User> list=discuss.getUserlist();
 					if(list==null) {
 						List<User> ff=new ArrayList<User>();
+						ff.add(user);
 						discuss.setUserlist(ff);
 						discussDao.save(discuss);
 					}
-					List<Discuss> kk=user.getDiscusslist();
-					if(kk==null) {
-						List<Discuss> so=new ArrayList<Discuss>();
-						user.setDiscusslist(so);
+				    List<Discuss> dislist=user.getLikelist();
+					if(dislist==null) {
+						List<Discuss> jj=new ArrayList<Discuss>();
+						jj.add(discuss);
+						user.setLikelist(jj);
 						userDao.save(user);
 					}
-					//确认
+					//如果用户或评论的list为空，先设初值
 					User user1=userDao.findById(addsongDTO.getUserid()).get();
 					Discuss discuss1=discussDao.findById(addsongDTO.getDiscussid()).get();
-					user1.getDiscusslist().add(discuss1);
+					user1.getLikelist().add(discuss1);
 					discuss1.getUserlist().add(user1);
 					userDao.save(user1);
 					discussDao.save(discuss1);
@@ -1620,7 +1647,7 @@ public class UserServiceImpl implements UserService{
 	public ExtAjaxResponse adddiscuss(AdddiscussDTO adddiscussDTO) {
 		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
 		try {
-			if(adddiscussDTO.isLogin()) {//判断是否登录
+			if(adddiscussDTO.isIslogin()==true) {//判断是否登录
 				if(adddiscussDTO.getSongid().equals(0L)||adddiscussDTO.getUserid().equals(0L)) {
 					extAjaxResponse.setMsg("系统错误！传入id为空");
 					extAjaxResponse.setSuccess(false);
@@ -1646,6 +1673,7 @@ public class UserServiceImpl implements UserService{
 					else {
 						boolean b=false;
 						for(Music mm:musiclist) {
+							if(mm.getTrueid()!=null)
 							if(mm.getTrueid().equals(adddiscussDTO.getSongid())) {
 								b=true;
 								break;
@@ -1671,6 +1699,7 @@ public class UserServiceImpl implements UserService{
 					List<Music> dto=(List<Music>) musicDao.findAll();
 					Music thi=new Music();
 					for(Music mj:dto) {
+						if(mj.getTrueid()!=null)
 						if(mj.getTrueid().equals(adddiscussDTO.getSongid())) {
 							thi=mj;
 							break;
@@ -1754,6 +1783,13 @@ public class UserServiceImpl implements UserService{
 							DiscussDTO discussDTO=new DiscussDTO();
 							discussDTO.setId(dis.getId());
 							discussDTO.setContent(dis.getContent());
+							if(dis.getUserlist()==null) {
+								discussDTO.setLikernumber(new Integer(0));
+							}
+							else {
+								discussDTO.setLikernumber(dis.getUserlist().size());
+							}
+							discussDTO.setTime(dis.getCreateTime().getTime());
 							//discussDTO.setMusicname(dis.getMusic().get);
 							discussdtolist.add(discussDTO);
 						}
@@ -1785,11 +1821,24 @@ public class UserServiceImpl implements UserService{
 				{
 					User user=userDao.findById(adddiscussDTO.getUserid()).get();
 					Discuss discuss=discussDao.findById(adddiscussDTO.getDiscussid()).get();
-					//暂不判断什么，直接操作
+				
+					//清除评论的附带
+					
 					user.getDiscusslist().remove(discuss);
 				    Music music=discuss.getMusic();
 				    music.getDiscusslist().remove(discuss);
 				    discuss.setUser(null);
+				    discuss.setDiscuss(null);
+				    List<User> list=discuss.getUserlist();//清除点赞人
+				    if(list==null||list.size()==0) {
+				    	discuss.setUserlist(null);
+				    }else {
+				    	for(User uu:list) {
+				    		uu.getLikelist().remove(discuss);
+				    		userDao.save(uu);
+				    	}
+				    	discuss.setUserlist(null);
+				    }
 				    userDao.save(user);
 				    discussDao.save(discuss);
 				    musicDao.save(music);
@@ -1814,7 +1863,7 @@ public class UserServiceImpl implements UserService{
 	public ExtAjaxResponse replyother(AdddiscussDTO adddiscussDTO) {
 		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
 		try {
-			if(adddiscussDTO.isLogin()) {
+			if(adddiscussDTO.isIslogin()) {
 				if(adddiscussDTO.getDiscussid().equals(0L)||adddiscussDTO.getUserid().equals(0L))
 				{
 					extAjaxResponse.setMsg("系统错误！传入数据为空");
@@ -1870,6 +1919,170 @@ public class UserServiceImpl implements UserService{
 			}else {
 				extAjaxResponse.setMsg("请您登录！");
 				extAjaxResponse.setSuccess(false);
+			}
+		}catch(Exception e) {
+			extAjaxResponse.setMsg("系统错误！");
+			extAjaxResponse.setSuccess(false);
+		}
+		return extAjaxResponse;
+	}
+
+	@Override
+	public LoginRspDTO phonelogin(UserloginDTO userloginDTO) {
+		LoginRspDTO loginRspDTO=new LoginRspDTO();
+		try {
+			if(BeanUtil.isNull(userloginDTO.getMessage())||BeanUtil.isNull(userloginDTO.getPassword()))
+			{
+				loginRspDTO.setMsg("输入的账号或密码为空！");
+				loginRspDTO.setSuccess(false);
+			}else{
+				User user1=userDao.findByname(userloginDTO.getMessage(), userloginDTO.getPassword());
+				if(user1!=null) {
+					loginRspDTO.setUserid(user1.getId());
+					loginRspDTO.setName(user1.getName());
+					loginRspDTO.setMsg("登录成功！");
+					loginRspDTO.setSuccess(true);
+					return loginRspDTO;
+				}else {
+					User user2=userDao.findByphone(userloginDTO.getMessage(), userloginDTO.getPassword());
+				    if(user2!=null) {
+				    	loginRspDTO.setUserid(user1.getId());
+						loginRspDTO.setName(user1.getName());
+						loginRspDTO.setMsg("登录成功！");
+						loginRspDTO.setSuccess(true);
+						return loginRspDTO;
+				    }else {
+				    	User user3=userDao.findByemail(userloginDTO.getMessage(), userloginDTO.getPassword());
+				        if(user3!=null) {
+				        	loginRspDTO.setUserid(user1.getId());
+							loginRspDTO.setName(user1.getName());
+							loginRspDTO.setMsg("登录成功！");
+							loginRspDTO.setSuccess(true);
+							return loginRspDTO;
+				        }else {
+				        	loginRspDTO.setMsg("账号或密码错误！");
+							loginRspDTO.setSuccess(false);
+							return loginRspDTO;
+				        }
+				    }
+				}
+			}
+		}catch(Exception e) {
+			loginRspDTO.setMsg("系统错误！");
+			loginRspDTO.setSuccess(false);
+		}
+		
+		return loginRspDTO;
+	}
+
+	@Override
+	public ExtAjaxResponse deletemysong(AddsongDTO adddiscussDTO) {
+		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+		try {
+			if(adddiscussDTO.getSongid().equals(0L)||adddiscussDTO.getUserid().equals(0L)) {
+				extAjaxResponse.setMsg("系统错误！传入数据为空！");
+				extAjaxResponse.setSuccess(false);
+			}else {
+				if(adddiscussDTO.getSonglistid().equals(0L)) {//删除我喜欢歌单的歌曲
+					if(userDao.existsById(adddiscussDTO.getUserid())) {
+						User user=userDao.findById(adddiscussDTO.getUserid()).get();
+						List<Music> list=(List<Music>) musicDao.findAll();
+						Music music=new Music();
+						if(list==null||list.size()==0) {
+							extAjaxResponse.setMsg("系统错误！数据库无音乐信息！");
+							extAjaxResponse.setSuccess(false);
+							return extAjaxResponse;
+						}else {
+							for(Music mm:list) {
+								if(mm.getTrueid().equals(adddiscussDTO.getSongid())) {
+									music=mm;
+									break;
+								}
+							}
+						}
+						user.getMusiclist().remove(music);
+						userDao.save(user);
+						extAjaxResponse.setMsg("删除成功");
+						extAjaxResponse.setSuccess(true);
+					}else {
+						extAjaxResponse.setMsg("系统错误！此用户没有注册！");
+						extAjaxResponse.setSuccess(false);
+					}
+				}else {//删除自己创建的歌单歌曲
+					if(songListDao.existsById(adddiscussDTO.getSonglistid())) {
+						SongList songlist=songListDao.findById(adddiscussDTO.getSonglistid()).get();
+						List<Music> list=songlist.getMusiclist();
+						Music music=new Music();
+						if(list==null||list.size()==0) {
+							extAjaxResponse.setMsg("系统错误！此歌单无歌曲信息！");
+							extAjaxResponse.setSuccess(false);
+							return extAjaxResponse;
+						}else {
+							for(Music mm:list) {
+								if(mm.getTrueid().equals(adddiscussDTO.getSongid())) {
+									music=mm;
+									break;
+								}
+							}
+						}
+						songlist.getMusiclist().remove(music);
+						music.getSonglist().remove(songlist);
+						musicDao.save(music);
+						songListDao.save(songlist);
+						extAjaxResponse.setMsg("删除成功");
+						extAjaxResponse.setSuccess(true);
+					}else {
+						extAjaxResponse.setMsg("系统错误！此歌单不存在");
+						extAjaxResponse.setSuccess(false);
+					}
+					
+				}
+			
+				
+					
+				
+			
+			}
+		}catch(Exception e) {
+			extAjaxResponse.setMsg("系统错误！");
+			extAjaxResponse.setSuccess(false);
+		}
+		return extAjaxResponse;
+	}
+
+	@Override
+	public ExtAjaxResponse checkinmylike(AddsongDTO addsongDTO) {
+		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+		try {
+			if(addsongDTO.getSongid().equals(0L)||addsongDTO.getUserid().equals(0L)) {
+				extAjaxResponse.setMsg("系统错误！传入数据为空");
+				extAjaxResponse.setSuccess(false);
+			}else {
+				if(userDao.existsById(addsongDTO.getUserid())) {
+					User user=userDao.findById(addsongDTO.getUserid()).get();
+					List<Music> list=user.getMusiclist();
+					Music music=new Music();
+					if(list==null||list.size()==0) {
+						
+					}else {
+						for(Music mm:list) {
+							if(mm.getTrueid().equals(addsongDTO.getSongid())) {
+								extAjaxResponse.setMsg("success");
+								extAjaxResponse.setIsmylike(true);
+								extAjaxResponse.setSuccess(true);
+								return extAjaxResponse;
+							}
+						}
+					
+					}
+					extAjaxResponse.setMsg("success");
+					extAjaxResponse.setIsmylike(false);
+					extAjaxResponse.setSuccess(true);
+					
+				}else {
+					extAjaxResponse.setMsg("系统错误！此用户没有注册");
+					extAjaxResponse.setSuccess(false);
+				}
 			}
 		}catch(Exception e) {
 			extAjaxResponse.setMsg("系统错误！");

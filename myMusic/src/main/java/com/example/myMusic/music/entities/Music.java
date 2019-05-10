@@ -30,7 +30,7 @@ public class Music extends BaseEntity{
 //	private Integer amount_play=null;//播放量
 //	private String picturepath;
 	
-	private List<User> userlist=new ArrayList<User>();  //被谁收藏 网易云歌单才有
+	private List<User> userlist=new ArrayList<User>();  //被谁收藏 
 	private List<Discuss> discusslist=new ArrayList<Discuss>();//该歌的所有评论
 	private List<SongList> songlist=new ArrayList<SongList>();//被非网易云歌单所包含的歌单
 	
@@ -40,18 +40,7 @@ public class Music extends BaseEntity{
 	public void setTrueid(Long trueid) {
 		this.trueid = trueid;
 	}
-//	public String getPicturepath() {
-//		return picturepath;
-//	}
-//	public void setPicturepath(String picturepath) {
-//		this.picturepath = picturepath;
-//	}
-//	public Integer getAmount_play() {
-//		return amount_play;
-//	}
-//	public void setAmount_play(Integer amount_play) {
-//		this.amount_play = amount_play;
-//	}
+
 	@ManyToMany(mappedBy="musiclist")
 	public List<User> getUserlist() {
 		return userlist;

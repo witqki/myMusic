@@ -2,7 +2,7 @@ package com.example.myMusic.discuss.entities;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.persistence.ManyToMany;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -24,7 +24,7 @@ public class Discuss extends BaseEntity{
 	   private User user;  //该评论的用户     
        private Music music;//该评论属于哪首歌
        private Discuss discuss;//如果存在，则此为回复  单方向，可直接置空
-       private List<User> userlist=new ArrayList<User>();//点赞人 单方向，可直接置空
+       private List<User> userlist=new ArrayList<User>();//点赞人 
 	
      @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)  
 	 public Discuss getDiscuss() {
@@ -33,7 +33,7 @@ public class Discuss extends BaseEntity{
 	public void setDiscuss(Discuss discuss) {
 		this.discuss = discuss;
 	}
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	public List<User> getUserlist() {
 		return userlist;
 	}

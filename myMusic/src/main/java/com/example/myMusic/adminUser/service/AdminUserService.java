@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.myMusic.common.dto.adminUser.CheckDTO;
 import com.example.myMusic.common.dto.adminUser.ComUserDTO;
-
+import com.example.myMusic.common.dto.adminUser.SuperDTO;
 import com.example.myMusic.common.dto.adminUser.UserRspDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
 import com.example.myMusic.common.dto.music.SearchMusicDTO;
@@ -18,7 +18,7 @@ import com.example.myMusic.common.dto.user.LoginRspDTO;
 import com.example.myMusic.common.web.ExtAjaxResponse;
 
 public interface AdminUserService {
-	public ExtAjaxResponse deleteuserDiscuss(CheckDTO checkDTO); 
+	public ExtAjaxResponse deleteuserDiscuss(ExtAjaxResponse extAjaxResponse); 
 	 //public ExtAjaxResponse importsong(String  path);
 	 public ExtAjaxResponse change_authority(ComUserDTO comUserDTO);
 	 public UserRspDTO findUser(LoginRspDTO loginRspDTO) ;
@@ -28,11 +28,12 @@ public interface AdminUserService {
 	 public SongListRspDTO getsongList(Long id);
 	 public SongListRspDTO looksongList();
 	 public SearchResponseDTO looksong();
-	public DiscussResponseDTO checkDiscuss(CheckDTO checkDTO);
+	public DiscussResponseDTO checkDiscuss(ExtAjaxResponse extAjaxResponse);
 	public ExtAjaxResponse changesongList(SongListDTO songListDTO) ;
 	public ExtAjaxResponse addsongList( SongListDTO songListDTO);
 	public SongListRspDTO getApplesongList();
 	public ExtAjaxResponse agreeApplesongList(Long id);
 	public ExtAjaxResponse refuseApplesongList( Long id);
 	public ExtAjaxResponse deletesongList( Long id) ;
+	public ExtAjaxResponse superlogin(SuperDTO superDTO);
 }

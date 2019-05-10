@@ -444,10 +444,12 @@ public class BeanUtil {
 		{
 			extAjaxResponse.setMsg("密码为空！");
 			extAjaxResponse.setSuccess(false);
-		}else if(conpsw.trim()==null||conpsw.trim().equals("")) {
+		}
+	   else if(conpsw.trim()==null||conpsw.trim().equals("")) {
 			extAjaxResponse.setMsg("确认密码为空！");
 			extAjaxResponse.setSuccess(false);
-		}else if(psw.trim().equals(conpsw.trim())) {
+		}
+		else if(!psw.trim().equals(conpsw.trim())) {
 			extAjaxResponse.setMsg("密码与确认密码不相同！");
 			extAjaxResponse.setSuccess(false);
 		}else if(!Rules.passwordrule(psw.trim())) {
@@ -519,7 +521,8 @@ public class BeanUtil {
 	   if(isNull(email)||isNull(content)) {
 		   extAjaxResponse.setMsg("传入信息有为空！");
 		   extAjaxResponse.setSuccess(false);
-	   }else {
+	   }
+	   else {
 		   Properties prop = new Properties();
 			// 开启debug调试，以便在控制台查看
 			prop.setProperty("mail.debug", "true"); 
@@ -547,7 +550,8 @@ public class BeanUtil {
 			// 发送邮件
 			ts.sendMessage(message, message.getAllRecipients());
 			ts.close();
-			}catch(Exception e) {
+			}
+			catch(Exception e) {
 				e.printStackTrace();
 				extAjaxResponse.setMsg("发送产生未知错误！");
 				extAjaxResponse.setSuccess(false);

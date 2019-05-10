@@ -73,7 +73,7 @@ public class SongList extends BaseEntity{
 	public void setUserlist(List<User> userlist) {
 		this.userlist = userlist;
 	}
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	public List<Music> getMusiclist() {
 		return musiclist;
 	}

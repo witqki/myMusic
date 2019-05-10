@@ -24,16 +24,22 @@ public class User extends BaseEntity{
      private boolean sex;
      private String phone;
      private String email;
-    // private String pictureUrl;//头像地址
+   
      private boolean isadmin=false;//是否普通管理员
      private boolean iswrite=true;//是否能发评论
-     private boolean isapply=true;//能否申请歌单分享
+    
      private List<Discuss> discusslist=new ArrayList<Discuss>();//用户的评论  
      private List<SongList> songlist=new ArrayList<SongList>();//歌单
      private List<Music> musiclist=new ArrayList<Music>();//自己收藏的歌曲
-
-     
- 
+     //点赞使用
+     private List<Discuss> likelist=new ArrayList<Discuss>();//此用户对那些评论进行点赞
+     @ManyToMany(mappedBy="userlist")
+	public List<Discuss> getLikelist() {
+		return likelist;
+	}
+	public void setLikelist(List<Discuss> likelist) {
+		this.likelist = likelist;
+	}
 	public boolean isIsadmin() {
 		return isadmin;
 	}
@@ -46,12 +52,7 @@ public class User extends BaseEntity{
 	public void setIswrite(boolean iswrite) {
 		this.iswrite = iswrite;
 	}
-	public boolean isIsapply() {
-		return isapply;
-	}
-	public void setIsapply(boolean isapply) {
-		this.isapply = isapply;
-	}
+
 	@OneToMany(mappedBy="user")
 	public List<Discuss> getDiscusslist() {
 		return discusslist;

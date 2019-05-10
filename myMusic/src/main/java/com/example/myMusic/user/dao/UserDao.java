@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-
+import com.example.myMusic.adminUser.entities.AdminUser;
 import com.example.myMusic.user.entities.User;
 /**
  * Spring Data JPA 常用接口
@@ -51,7 +51,12 @@ public interface UserDao extends PagingAndSortingRepository<User, Long>//分页�
 	List<User> findByUserphone(String userphone);
 	@Query("from User u where u.email = ?1")
 	List<User> findByUseremail(String useremail);
-      
-      
+	
+	@Query("from User s where s.name = ?1  AND s.password = ?2")
+	User findByname(String username, String password);
+	@Query("from User s where s.phone = ?1  AND s.password = ?2")
+	User findByphone(String username, String password);
+	@Query("from User s where s.email = ?1  AND s.password = ?2")
+	User findByemail(String username, String password);
       
 }

@@ -8,12 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.myMusic.adminUser.dao.AdminUserDao;
+import com.example.myMusic.adminUser.entities.AdminUser;
 import com.example.myMusic.adminUser.service.AdminUserService;
 import com.example.myMusic.common.dto.adminUser.CheckDTO;
 import com.example.myMusic.common.dto.adminUser.ComUserDTO;
 import com.example.myMusic.common.dto.adminUser.PathDTO;
+import com.example.myMusic.common.dto.adminUser.SuperDTO;
 import com.example.myMusic.common.dto.adminUser.UserDTO;
 import com.example.myMusic.common.dto.adminUser.UserRspDTO;
+import com.example.myMusic.common.dto.discuss.AdddiscussDTO;
 import com.example.myMusic.common.dto.discuss.DiscussDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
 import com.example.myMusic.common.dto.music.SearchMusicDTO;
@@ -32,15 +36,20 @@ import com.example.myMusic.songList.dao.SongListDao;
 import com.example.myMusic.songList.entities.SongList;
 import com.example.myMusic.user.dao.UserDao;
 import com.example.myMusic.user.entities.User;
+import com.example.myMusic.user.service.UserService;
 @Service
 @Transactional
 public class AdminUserServiceImpl implements AdminUserService{
+	@Autowired
+	private UserService userService=null;
 	@Autowired
     private MusicDao musicDao=null;
 	@Autowired
     private DiscussDao discussDao=null;
 	@Autowired
     private SongListDao songListDao=null;
+	@Autowired
+    private AdminUserDao adminUserDao=null;
 	@Autowired
     private UserDao userDao=null;
 //	@Override
@@ -191,8 +200,8 @@ public class AdminUserServiceImpl implements AdminUserService{
 		try {
 			if(userDao.existsById(comUserDTO.getId())) {		
 					User user=userDao.findById(comUserDTO.getId()).get();
-					user.setIswrite(comUserDTO.isWrite());
-					user.setIsapply(comUserDTO.isIsapply());
+					user.setIswrite(comUserDTO.isIswrite());
+					user.setIsadmin(comUserDTO.isIsadmin());
 					userDao.save(user);
 					extAjaxResponse.setMsg("success");
 					extAjaxResponse.setSuccess(true);						
@@ -301,21 +310,29 @@ public class AdminUserServiceImpl implements AdminUserService{
 
 
 	@Override
-	public DiscussResponseDTO checkDiscuss(CheckDTO checkDTO) {
+	public DiscussResponseDTO checkDiscuss(ExtAjaxResponse extAjaxResponse) {
 		DiscussResponseDTO discussResponseDTO=new DiscussResponseDTO();
 		try {
-			if(checkDTO.isSuperAdmin()) {//超级管理员
+			if(extAjaxResponse.isSuccess()) {//超级管理员
 				List<Discuss> list=(List<Discuss>) discussDao.findAll();
 				if(list==null||list.size()==0) {
 					discussResponseDTO.setMsg("系统暂无评论数据");
 					discussResponseDTO.setSuccess(false); 
-				}else {
+					return discussResponseDTO;
+				}	
+		
+				else {
+//					
 					List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
 					for(Discuss dis:list) {
 						DiscussDTO discussDTO=new DiscussDTO();
 						discussDTO.setContent(dis.getContent());
 						discussDTO.setDiscussid(dis.getId());
-						discussDTO.setName(dis.getUser().getName());
+						User user=dis.getUser();
+					    if(user!=null) {
+					    	discussDTO.setName(user.getName());
+					    }
+					    discussDTO.setTime(dis.getCreateTime().getTime());
 						discussdtolist.add(discussDTO);
 					}
 					discussResponseDTO.setDiscussdtolist(discussdtolist);
@@ -332,14 +349,20 @@ public class AdminUserServiceImpl implements AdminUserService{
 					List<DiscussDTO> discussdtolist=new ArrayList<DiscussDTO>();
 					for(Discuss dis:list) {
 						User user=dis.getUser();
-						if(user.isIsadmin()) {
-							
-						}else {
-							DiscussDTO discussDTO=new DiscussDTO();
-							discussDTO.setContent(dis.getContent());
-							discussDTO.setDiscussid(dis.getId());
-							discussDTO.setName(dis.getUser().getName());
-							discussdtolist.add(discussDTO);
+						if(user!=null) {
+							if(user.isIsadmin()) {
+								
+							}else {
+								DiscussDTO discussDTO=new DiscussDTO();
+								discussDTO.setContent(dis.getContent());
+								discussDTO.setDiscussid(dis.getId());
+								User user1=dis.getUser();
+							    if(user1!=null) {
+							    	discussDTO.setName(user.getName());
+							    }
+							    discussDTO.setTime(dis.getCreateTime().getTime());
+								discussdtolist.add(discussDTO);
+							}
 						}
 						
 					}
@@ -393,46 +416,74 @@ public class AdminUserServiceImpl implements AdminUserService{
 				extAjaxResponse.setSuccess(false);
 				return extAjaxResponse;
 			}
-			if(musicDao.existsById(id)) {
-				Music music=musicDao.findById(id).get();
-				List<User> userlist=music.getUserlist();
-				List<Discuss> discusslist=music.getDiscusslist();
-				if(userlist==null||userlist.size()==0) {
-					
-				}else {
+			    List<Music> list=(List<Music>) musicDao.findAll();
+				Music music=new Music();
+				if(list==null||list.size()==0) {
+					extAjaxResponse.setMsg("系统发生错误！数据库为空");
+					extAjaxResponse.setSuccess(false);
+					return extAjaxResponse;
+				}
+			    for(Music mm:list) {
+			    	if(mm.getTrueid().equals(id)) {
+			    		music=mm;
+			    		break;
+			    	}
+			    }
+		
+			     //删除操作
+			    //解除收藏的用户
+			    List<User> userlist=music.getUserlist();
+                 if(userlist==null||userlist.size()==0) {
+                	 music.setUserlist(null);	
+				  }
+                 else {
 					for(User uu:userlist) {
 						uu.getMusiclist().remove(music);
 						userDao.save(uu);
 					}
-					music.setUserlist(null);
-					
+					music.setUserlist(null);				
+				  }
+         	 
+//                 //解除评论
+				List<Discuss> discusslist=music.getDiscusslist();
+		        if(discusslist==null||discusslist.size()==0) {
+					music.setDiscusslist(null);
 				}
-				
-	            if(discusslist==null||discusslist.size()==0) {
-					
-				}else {
-					for(Discuss dd:discusslist) {
-					     User tt=dd.getUser();
-					     tt.getDiscusslist().remove(dd);
-					     userDao.save(tt);
-					     dd.setUser(null);
-					     dd.setMusic(null);
-					     dd.setDiscuss(null);
-					     dd.setUserlist(null);
-						discussDao.save(dd);
-						discussDao.deleteById(dd.getId());
+		        else {
+					for(Discuss dd:discusslist) {//取出每个评论
+						AdddiscussDTO adddiscussDTO=new AdddiscussDTO();
+						adddiscussDTO.setUserid(dd.getId());
+						adddiscussDTO.setDiscussid(dd.getId());
+						DiscussResponseDTO discussResponseDTO=userService.deletemydiscuss(adddiscussDTO);
+                        if(!discussResponseDTO.isSuccess()) {
+                        	extAjaxResponse.setMsg(discussResponseDTO.getMsg()+"哈哈");
+            				extAjaxResponse.setSuccess(discussResponseDTO.isSuccess());	
+            				return extAjaxResponse;
+                        }
 					}
-					music.setUserlist(null);
+					music.setDiscusslist(null);
 					
 				}
-	            musicDao.save(music);
-				musicDao.deleteById(id);
+		      
+		        //解除与歌单的绑定
+		        List<SongList> songlist=music.getSonglist();
+		        if(songlist==null||songlist.size()==0) {
+		        	music.setSonglist(null);
+		        }
+		        else {
+		        	for(SongList ll:songlist) {
+		        		ll.getMusiclist().remove(music);
+		        	//	songListDao.save(ll);
+		        	}
+		        	music.setSonglist(null);
+		        }
+		        
+		    
+//		        //全部解除完毕
+		        musicDao.save(music);
+				musicDao.deleteById(music.getId());
 				extAjaxResponse.setMsg("删除成功！");
-				extAjaxResponse.setSuccess(true);
-			}else {
-				extAjaxResponse.setMsg("歌曲不存在！");
-				extAjaxResponse.setSuccess(false);
-			}
+				extAjaxResponse.setSuccess(true);		
 		}catch(Exception e) {
 			extAjaxResponse.setMsg("系统发生错误！");
 			extAjaxResponse.setSuccess(false);
@@ -508,15 +559,45 @@ public class AdminUserServiceImpl implements AdminUserService{
 	public ExtAjaxResponse deletesongList(Long id) {
 		ExtAjaxResponse extAjaxResponse =new ExtAjaxResponse();
 		try {
-			if(songListDao.existsById(id) ){
-				songListDao.deleteById(id);
-				extAjaxResponse.setMsg("success！");
+			if(id.equals(0L)) {
+				extAjaxResponse.setMsg("系统发生错误！传入数据为空");
+				extAjaxResponse.setSuccess(false);
+				return extAjaxResponse;
+			}
+			
+				SongList songlist=new SongList();
+				List<SongList> list=(List<SongList>) songListDao.findAll();
+				if(list==null||list.size()==0) {
+					extAjaxResponse.setMsg("系统发生错误！数据库无歌单信息！");
+					extAjaxResponse.setSuccess(false);
+					return extAjaxResponse;
+				}
+				else {
+					for(SongList ss:list) {
+						if(ss.getTrueid().equals(id)) {
+							songlist=ss;
+							break;
+						}
+					}
+				}
+				//找到歌单信息后，进行
+				List<User> userlist=songlist.getUserlist();
+				if(userlist.size()==0||userlist==null) {
+					
+				}else {
+					for(User user:userlist) {
+						user.getSonglist().remove(songlist);
+						userDao.save(user);
+					}
+					songlist.setUserlist(null);
+				}
+				
+				songListDao.save(songlist);	
+				songListDao.deleteById(songlist.getId());
+				extAjaxResponse.setMsg("删除成功！");
 				extAjaxResponse.setSuccess(true);
 				
-			}else {
-				extAjaxResponse.setMsg("歌曲不存在！");
-				extAjaxResponse.setSuccess(false);
-			}
+			
 		}catch(Exception e) {
 			extAjaxResponse.setMsg("系统发生错误！");
 			extAjaxResponse.setSuccess(false);
@@ -731,12 +812,12 @@ public class AdminUserServiceImpl implements AdminUserService{
 
 
 	@Override
-	public ExtAjaxResponse deleteuserDiscuss(CheckDTO checkDTO) {
+	public ExtAjaxResponse deleteuserDiscuss(ExtAjaxResponse ext) {
 		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
 		try {
-			if(checkDTO.getDiscussid().equals(0L)) {
-				if(discussDao.existsById(checkDTO.getDiscussid())) {
-					Discuss discuss=discussDao.findById(checkDTO.getDiscussid()).get();
+			if(!ext.getDiscussid().equals(0L)) {
+				if(discussDao.existsById(ext.getDiscussid())) {
+					Discuss discuss=discussDao.findById(ext.getDiscussid()).get();
 					User user=discuss.getUser();
 					Music music=discuss.getMusic();
 					user.getDiscusslist().remove(discuss);
@@ -746,7 +827,7 @@ public class AdminUserServiceImpl implements AdminUserService{
 					userDao.save(user);
 					musicDao.save(music);
 					discussDao.save(discuss);
-					discussDao.deleteById(checkDTO.getDiscussid());
+					discussDao.deleteById(ext.getDiscussid());
 					extAjaxResponse.setMsg("删除成功！");
 					extAjaxResponse.setSuccess(true);
 					
@@ -759,6 +840,28 @@ public class AdminUserServiceImpl implements AdminUserService{
 				extAjaxResponse.setMsg("系统发生错误！传入数据为空！");
 				extAjaxResponse.setSuccess(false);
 			}
+		}catch(Exception e) {
+			extAjaxResponse.setMsg("系统发生错误！");
+			extAjaxResponse.setSuccess(false);
+		}
+		return extAjaxResponse;
+	}
+
+
+	@Override
+	public ExtAjaxResponse superlogin(SuperDTO superDTO) {
+		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+		try {
+			AdminUser adminUser=adminUserDao.findByUsernameAndPassword(superDTO.getUsername(), superDTO.getPassword());
+			if(adminUser!=null) {
+				extAjaxResponse.setMsg("登录成功！");
+				extAjaxResponse.setName(superDTO.getUsername());
+				extAjaxResponse.setSuccess(true);
+			}else {
+				extAjaxResponse.setMsg("用户名或密码错误！"+superDTO.getUsername());
+				extAjaxResponse.setSuccess(false);
+			}
+			
 		}catch(Exception e) {
 			extAjaxResponse.setMsg("系统发生错误！");
 			extAjaxResponse.setSuccess(false);

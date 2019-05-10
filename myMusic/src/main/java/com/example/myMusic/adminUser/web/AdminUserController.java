@@ -17,8 +17,11 @@ import com.example.myMusic.adminUser.service.AdminUserService;
 import com.example.myMusic.common.dto.adminUser.CheckDTO;
 import com.example.myMusic.common.dto.adminUser.ComUserDTO;
 import com.example.myMusic.common.dto.adminUser.PathDTO;
+import com.example.myMusic.common.dto.adminUser.SuperDTO;
 import com.example.myMusic.common.dto.adminUser.UserRspDTO;
+import com.example.myMusic.common.dto.discuss.DiscussDTO;
 import com.example.myMusic.common.dto.discuss.DiscussResponseDTO;
+import com.example.myMusic.common.dto.discuss.ThisDTO;
 import com.example.myMusic.common.dto.music.SearchMusicDTO;
 import com.example.myMusic.common.dto.music.SearchResponseDTO;
 import com.example.myMusic.common.dto.songList.SongListDTO;
@@ -31,6 +34,15 @@ import com.example.myMusic.music.entities.Music;
 public class AdminUserController {
 	@Autowired
 	private AdminUserService adminUserService=null;
+	
+	@PostMapping(value="/superlogin",consumes=MediaType.APPLICATION_JSON_VALUE)
+	public ExtAjaxResponse superlogin(@RequestBody SuperDTO superDTO) {
+//		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+//		extAjaxResponse.setMsg(superDTO.getUsername());
+//		extAjaxResponse.setSuccess(false);
+		return adminUserService.superlogin(superDTO);
+	}
+	
 	/*
 	 * 歌曲管理
 	 */
@@ -70,7 +82,9 @@ public class AdminUserController {
 	//删除歌曲
 	@PostMapping(value="/deletesong/{id}")
 	public ExtAjaxResponse deletesong(@PathVariable("id") Long id) {
-	
+//		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+//		extAjaxResponse.setMsg(""+id);
+//		extAjaxResponse.setSuccess(false);
 		return adminUserService.deletesong(id);
 	}
 	//修改歌曲信息
@@ -136,7 +150,9 @@ public class AdminUserController {
 	//权限修改
 	@PostMapping(value="/change_authority",consumes=MediaType.APPLICATION_JSON_VALUE)
 	public ExtAjaxResponse change_authority(@RequestBody ComUserDTO comUserDTO) {
-	
+//		ExtAjaxResponse extAjaxResponse=new ExtAjaxResponse();
+//		extAjaxResponse.setSuccess(false);
+//		extAjaxResponse.setMsg(""+comUserDTO.isWrite());
 		return adminUserService.change_authority(comUserDTO);
 	}
 	//获取用户信息列表，如果是超级管理员，则返回所有用户信息，如果是普通管理员，返回用户信息
@@ -154,15 +170,20 @@ public class AdminUserController {
 	 * 评论管理
 	 *///查看用户评论
 		@PostMapping(value="/checkDiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
-		public DiscussResponseDTO checkDiscuss(CheckDTO checkDTO) {
+		public DiscussResponseDTO checkDiscuss(@RequestBody ExtAjaxResponse extAjaxResponse) {
+			DiscussResponseDTO discussResponseDTO=new DiscussResponseDTO();
 		
-			return adminUserService.checkDiscuss(checkDTO);
+			
+			return adminUserService.checkDiscuss(extAjaxResponse);
 		}
 		//删除用户评论
 		@PostMapping(value="/deleteuserDiscuss",consumes=MediaType.APPLICATION_JSON_VALUE)
-		public ExtAjaxResponse deleteuserDiscuss(CheckDTO checkDTO) {
-		
-			return adminUserService.deleteuserDiscuss(checkDTO);
+		public ExtAjaxResponse deleteuserDiscuss(@RequestBody ExtAjaxResponse extAjaxResponse) {
+			ExtAjaxResponse ext=new ExtAjaxResponse();
+			ext.setMsg(""+extAjaxResponse.getDiscussid()+extAjaxResponse.isSuccess());
+			ext.setSuccess(extAjaxResponse.isSuccess());
+			
+			return adminUserService.deleteuserDiscuss(extAjaxResponse);
 		}
 		
 		

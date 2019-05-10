@@ -28,6 +28,7 @@ import com.example.myMusic.user.entities.User;
 
 
 public interface UserService {
+	public LoginRspDTO phonelogin(UserloginDTO userloginDTO); 
 	public ExtAjaxResponse replyother(AdddiscussDTO adddiscussDTO);
 	 public DiscussResponseDTO deletemydiscuss( AdddiscussDTO adddiscussDTO); 
 	 public DiscussResponseDTO lookmydiscuss( AdddiscussDTO adddiscussDTO);
@@ -66,4 +67,6 @@ public interface UserService {
 	
 	
 	public List<User> findAll();
+	public ExtAjaxResponse deletemysong(AddsongDTO addsongDTO);
+	public ExtAjaxResponse checkinmylike(AddsongDTO addsongDTO);
 }
