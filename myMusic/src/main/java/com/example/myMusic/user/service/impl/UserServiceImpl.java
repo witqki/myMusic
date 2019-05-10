@@ -1224,6 +1224,7 @@ public class UserServiceImpl implements UserService{
 					}else {//如果数据库有数据
 						boolean b=false;
 						for(Music m:list) {
+							if(m.getTrueid()!=null)
 							if(m.getTrueid().equals(addsongDTO.getSongid())) {
 								b=true;
 								break;
@@ -1238,6 +1239,7 @@ public class UserServiceImpl implements UserService{
 					List<Music> musiclist=(List<Music>) musicDao.findAll();
 					Music mu=new Music();
 					for(Music g:musiclist) {
+						if(g.getTrueid()!=null)
 						if(g.getTrueid().equals(addsongDTO.getSongid())) {
 							mu=g;
 						}
@@ -1264,6 +1266,7 @@ public class UserServiceImpl implements UserService{
 							musicDao.save(mu);
 						}else {//用户有歌曲
 							for(Music Music:musicdto) {
+								if(Music.getTrueid()!=null)
 								if(Music.getTrueid().equals(mu.getTrueid())) {
 									extAjaxResponse.setMsg("已存在您的歌单里！");
 									extAjaxResponse.setSuccess(false);
@@ -1296,29 +1299,30 @@ public class UserServiceImpl implements UserService{
 								ss.add(mu);
 								songList.setMusiclist(ss);
 							}
-							//else {//歌单存在歌曲
-//								for(Music Music:musicDTO) {
-//									if(Music.getTrueid().equals(mu.getTrueid())) {//判断是否含有此歌曲
-//										extAjaxResponse.setMsg("已存在您的歌单里！");
-//										extAjaxResponse.setSuccess(false);
-//										return extAjaxResponse;
-//									}
-//								}
-//								//此歌单不含有此歌曲
-//								songList.getMusiclist().add(mu);
-//							}
-//							//判断歌曲是否含有歌单
-//							List<SongList> hh=mu.getSonglist();
-//							if(hh.size()==0||hh==null) {//为空
-//								List<SongList> ff=new ArrayList<SongList>();
-//								ff.add(songList);
-//								mu.setSonglist(ff);
-//							}else {//此歌曲存在歌单
-//								mu.getSonglist().add(songList);
-//							}
-//
-//							musicDao.save(mu);
-//							songListDao.save(songList);
+							else {//歌单存在歌曲
+								for(Music Music:musicDTO) {
+									if(Music.getTrueid()!=null)
+									if(Music.getTrueid().equals(mu.getTrueid())) {//判断是否含有此歌曲
+										extAjaxResponse.setMsg("已存在您的歌单里！");
+										extAjaxResponse.setSuccess(false);
+										return extAjaxResponse;
+									}
+								}
+								//此歌单不含有此歌曲
+								songList.getMusiclist().add(mu);
+							}
+							//判断歌曲是否含有歌单
+							List<SongList> hh=mu.getSonglist();
+							if(hh.size()==0||hh==null) {//为空
+								List<SongList> ff=new ArrayList<SongList>();
+								ff.add(songList);
+								mu.setSonglist(ff);
+							}else {//此歌曲存在歌单
+								mu.getSonglist().add(songList);
+							}
+
+							musicDao.save(mu);
+							songListDao.save(songList);
 							extAjaxResponse.setMsg("添加成功！");
 							extAjaxResponse.setSuccess(true);
 							return extAjaxResponse;
@@ -1994,6 +1998,7 @@ public class UserServiceImpl implements UserService{
 							return extAjaxResponse;
 						}else {
 							for(Music mm:list) {
+								if(mm.getTrueid()!=null)
 								if(mm.getTrueid().equals(adddiscussDTO.getSongid())) {
 									music=mm;
 									break;
@@ -2019,6 +2024,7 @@ public class UserServiceImpl implements UserService{
 							return extAjaxResponse;
 						}else {
 							for(Music mm:list) {
+								if(mm.getTrueid()!=null)
 								if(mm.getTrueid().equals(adddiscussDTO.getSongid())) {
 									music=mm;
 									break;
@@ -2066,6 +2072,7 @@ public class UserServiceImpl implements UserService{
 						
 					}else {
 						for(Music mm:list) {
+							if(mm.getTrueid()!=null)
 							if(mm.getTrueid().equals(addsongDTO.getSongid())) {
 								extAjaxResponse.setMsg("success");
 								extAjaxResponse.setIsmylike(true);
