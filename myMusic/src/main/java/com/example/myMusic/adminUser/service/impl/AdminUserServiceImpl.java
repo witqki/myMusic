@@ -574,6 +574,7 @@ public class AdminUserServiceImpl implements AdminUserService{
 				}
 				else {
 					for(SongList ss:list) {
+						if(ss.getTrueid()!=null)
 						if(ss.getTrueid().equals(id)) {
 							songlist=ss;
 							break;
